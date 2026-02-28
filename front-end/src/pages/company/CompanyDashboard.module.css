@@ -1,0 +1,24 @@
+.companyDashboard {
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.statCard {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.applicationItem {
+  transition: all 0.3s ease;
+}
+
+.applicationItem:hover {
+  background-color: #e9ecef !important;
+  transform: scale(1.02);
+}
+

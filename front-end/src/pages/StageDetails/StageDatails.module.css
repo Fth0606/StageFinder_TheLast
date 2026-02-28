@@ -1,0 +1,69 @@
+.stageDetailsPage {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 3rem 0;
+}
+
+.detailsCard {
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+.detailsHeader {
+  background: linear-gradient(135deg, #0066CC 0%, #00C853 100%);
+  color: white;
+  padding: 2.5rem;
+}
+
+.companyLogo {
+  width: 100px;
+  height: 100px;
+  border-radius: 15px;
+  background: white;
+  padding: 0.5rem;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.detailsBody {
+  padding: 2.5rem;
+}
+
+.detailSection {
+  margin-bottom: 2rem;
+}
+
+.detailSection h5 {
+  color: #0066CC;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.requirementsList {
+  list-style: none;
+  padding: 0;
+}
+
+.requirementsList li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.requirementsList li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #00C853;
+  font-weight: bold;
+}
+
+.applySection {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 1.5rem;
+  position: sticky;
+  top: 100px;
+}

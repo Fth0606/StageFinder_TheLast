@@ -1,0 +1,54 @@
+.stage-card {
+  transition: all 0.3s ease;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stage-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 35px rgba(0, 102, 204, 0.2) !important;
+}
+
+.stage-card .card-header {
+  background: linear-gradient(135deg, #0066CC 0%, #00C853 100%);
+  color: white;
+  padding: 1.25rem;
+  border: none;
+  border-radius: 15px 15px 0 0;
+}
+
+.stage-card .card-header h5 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.stage-card .card-body {
+  padding: 1.5rem;
+  background: white;
+}
+
+.stage-card .card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+}
+
+.stage-card .badge {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.stage-card .btn {
+  transition: all 0.3s ease;
+}
+
+.stage-card .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+}

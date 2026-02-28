@@ -1,0 +1,39 @@
+.stagesListPage {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 3rem 0;
+}
+
+.filterSidebar {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 100px;
+}
+
+.filterSidebar h5 {
+  color: #0066CC;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+.stagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.noResults {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+}
+
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}

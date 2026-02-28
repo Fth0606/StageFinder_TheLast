@@ -1,0 +1,16 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App .main-content {
+  flex: 1;
+}
+
+/* Loading spinner */
+.spinner-border-custom {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3rem;
+}

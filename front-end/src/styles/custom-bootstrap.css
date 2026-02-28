@@ -1,0 +1,125 @@
+:root {
+  --primary-blue: #0066CC;
+  --primary-blue-dark: #0052A3;
+  --primary-blue-light: #3385D6;
+  
+  --secondary-green: #00C853;
+  --secondary-green-dark: #00A844;
+  --secondary-green-light: #33D470;
+  
+  --neutral-dark: #1A1A1A;
+  --neutral-gray: #6C757D;
+  --neutral-light: #F8F9FA;
+  
+  --success: #00C853;
+  --info: #0066CC;
+  --warning: #FFA726;
+  --danger: #EF5350;
+}
+
+/* Boutons Primary (Bleu) */
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-blue-dark);
+  border-color: var(--primary-blue-dark);
+}
+
+/* Boutons Success (Vert) */
+.btn-success {
+  background-color: var(--secondary-green);
+  border-color: var(--secondary-green);
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: var(--secondary-green-dark);
+  border-color: var(--secondary-green-dark);
+}
+
+/* Navbar */
+.navbar {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+  box-shadow: 0 2px 10px rgba(0, 102, 204, 0.2);
+}
+
+.navbar-brand {
+  color: white !important;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--secondary-green) !important;
+  transform: translateY(-2px);
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 102, 204, 0.15);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-green) 100%);
+  color: white;
+  border-radius: 12px 12px 0 0 !important;
+  font-weight: 600;
+}
+
+/* Badges */
+.badge-blue {
+  background-color: var(--primary-blue);
+  color: white;
+}
+
+.badge-green {
+  background-color: var(--secondary-green);
+  color: white;
+}
+
+/* Forms */
+.form-control:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+/* Links */
+a {
+  color: var(--primary-blue);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--secondary-green);
+}
+
+/* Alert personnalisé */
+.alert-info {
+  background-color: rgba(0, 102, 204, 0.1);
+  border-color: var(--primary-blue);
+  color: var(--primary-blue-dark);
+}
+
+.alert-success {
+  background-color: rgba(0, 200, 83, 0.1);
+  border-color: var(--secondary-green);
+  color: var(--secondary-green-dark);
+}

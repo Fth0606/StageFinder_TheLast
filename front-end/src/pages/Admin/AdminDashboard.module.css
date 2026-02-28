@@ -1,0 +1,16 @@
+.adminDashboard {
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.quickActionCard {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.quickActionCard:hover {
+  border-color: #0066CC;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 102, 204, 0.2);
+}
