@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    /**
-     * Get user profile with related data
-     */
     public function show(Request $request)
     {
         $user = $request->user();
@@ -37,111 +34,81 @@ class ProfileController extends Controller
 
     /**
      * Update user profile
-     * Accepts fields from EditProfile.js:
-     *   name, email, bio, phone, location, education, field, skills (array), password
-     * Maps to DB columns:
-     *   users: name, email, bio, password
-     *   students: university (← education), specialite (← field), skills, location
+     * students table: id, user_id, university, specialite, graduation_year, skills, cv_path, phone, location
+     * users table: id, name, email, password, role, bio, profile_picture
      */
-    /**
- * Update user profile
- */
-/**
- * Update user profile
- */
-public function update(Request $request)
-{
-    $user = $request->user();
+    public function update(Request $request)
+    {
+        $user = $request->user();
 
-    $validator = Validator::make($request->all(), [
-        'name'      => 'sometimes|string|max:255',
-        'email'     => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-        'bio'       => 'nullable|string',
-        'password'  => 'nullable|string|min:6',
-        // student fields
-        'education' => 'nullable|string|max:150',
-        'field'     => 'nullable|string|max:100',
-        'skills'    => 'nullable|array',
-        'phone'     => 'nullable|string|max:20',
-        'location'  => 'nullable|string|max:150',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'name'         => 'sometimes|string|max:255',
+            'email'        => 'sometimes|email|max:255|unique:users,email,' . $user->id,
+            'bio'          => 'nullable|string',
+            'password'     => 'nullable|string|min:6',
+            'education'    => 'nullable|string|max:150', // → university
+            'field'        => 'nullable|string|max:100', // → specialite
+            'skills'       => 'nullable|array',
+            'phone'        => 'nullable|string|max:20',  // → students.phone
+            'location'     => 'nullable|string|max:150', // → students.location
+            'company_name' => 'nullable|string|max:150',
+            'industry'     => 'nullable|string|max:100',
+            'description'  => 'nullable|string',
+            'website'      => 'nullable|string|max:255',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    try {
-        \DB::beginTransaction();
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         // Update users table
         $userData = [];
-        if ($request->filled('name'))   $userData['name'] = $request->name;
-        if ($request->filled('email'))  $userData['email'] = $request->email;
-        if ($request->filled('bio'))    $userData['bio'] = $request->bio;
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
-        }
+        if ($request->filled('name'))     $userData['name']  = $request->name;
+        if ($request->filled('email'))    $userData['email'] = $request->email;
+        if ($request->has('bio'))         $userData['bio']   = $request->bio;
+        if ($request->filled('password')) $userData['password'] = Hash::make($request->password);
+        if (!empty($userData)) $user->update($userData);
 
-        if (!empty($userData)) {
-            $user->update($userData);
-        }
-
-        // Update student profile
+        // Update students table
         if ($user->role === 'student') {
-            $student = $user->student;
-            
-            if (!$student) {
-                $student = Student::create(['user_id' => $user->id]);
-            }
-
             $studentData = [];
-            
-            if ($request->has('education')) {
-                $studentData['university'] = $request->education;
-            }
-            if ($request->has('field')) {
-                $studentData['specialite'] = $request->field;
-            }
-            if ($request->has('skills')) {
-                $studentData['skills'] = $request->skills;
-            }
-            if ($request->has('phone')) {
-                $studentData['phone'] = $request->phone;
-            }
-            if ($request->has('location')) {
-                $studentData['location'] = $request->location;
-            }
+            if ($request->has('education')) $studentData['university'] = $request->education;
+            if ($request->has('field'))     $studentData['specialite'] = $request->field;
+            if ($request->has('phone'))     $studentData['phone']      = $request->phone;
+            if ($request->has('location'))  $studentData['location']   = $request->location;
+            if ($request->has('skills'))    $studentData['skills']     = $request->skills;
 
             if (!empty($studentData)) {
-                $student->update($studentData);
+                if ($user->student) {
+                    $user->student->update($studentData);
+                } else {
+                    Student::create(array_merge([
+                        'user_id'    => $user->id,
+                        'university' => 'Non renseigné',
+                        'specialite' => 'Non renseigné',
+                    ], $studentData));
+                }
             }
         }
 
-        \DB::commit();
+        // Update companies table
+        if ($user->role === 'company' && $user->company) {
+            $companyData = [];
+            if ($request->filled('company_name')) $companyData['company_name'] = $request->company_name;
+            if ($request->filled('industry'))     $companyData['industry']     = $request->industry;
+            if ($request->filled('location'))     $companyData['location']     = $request->location;
+            if ($request->filled('description'))  $companyData['description']  = $request->description;
+            if ($request->filled('website'))      $companyData['website']      = $request->website;
+            if ($request->filled('phone'))        $companyData['phone']        = $request->phone;
+            if (!empty($companyData)) $user->company->update($companyData);
+        }
 
-        // Return updated user with all relationships
-        $user->load('student');
-        
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user
+            'user'    => $user->fresh()->load(['student', 'company']),
         ]);
-
-    } catch (\Exception $e) {
-        \DB::rollBack();
-        \Log::error('Profile update error: ' . $e->getMessage());
-        \Log::error('Stack trace: ' . $e->getTraceAsString());
-        
-        return response()->json([
-            'message' => 'Failed to update profile',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
-    /**
-     * Complete student profile after registration
-     */
     public function completeStudentProfile(Request $request)
     {
         $user = $request->user();
@@ -156,16 +123,15 @@ public function update(Request $request)
             'graduation_year' => 'nullable|integer|min:1950|max:' . (date('Y') + 5),
             'skills'          => 'nullable|array',
             'bio'             => 'nullable|string',
-            'location'        => 'required|string|max:150',
+            'location'        => 'nullable|string|max:150',
+            'phone'           => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if ($request->filled('bio')) {
-            $user->update(['bio' => $request->bio]);
-        }
+        if ($request->filled('bio')) $user->update(['bio' => $request->bio]);
 
         Student::updateOrCreate(
             ['user_id' => $user->id],
@@ -173,8 +139,9 @@ public function update(Request $request)
                 'university'      => $request->university,
                 'specialite'      => $request->specialite,
                 'graduation_year' => $request->graduation_year,
-                'skills'          => $request->skills,
+                'skills'          => $request->skills ?? [],
                 'location'        => $request->location,
+                'phone'           => $request->phone,
             ]
         );
 
@@ -184,9 +151,6 @@ public function update(Request $request)
         ]);
     }
 
-    /**
-     * Complete company profile after registration
-     */
     public function completeCompanyProfile(Request $request)
     {
         $user = $request->user();
@@ -224,9 +188,22 @@ public function update(Request $request)
         ]);
     }
 
-    /**
-     * Upload CV for student
-     */
+    public function applications(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'student' || !$user->student) {
+            return response()->json([]);
+        }
+
+        $applications = $user->student->applications()
+            ->with('offer.company')
+            ->latest('applied_at')
+            ->get();
+
+        return response()->json($applications);
+    }
+
     public function uploadCv(Request $request)
     {
         $user = $request->user();
@@ -249,16 +226,29 @@ public function update(Request $request)
             return response()->json(['message' => 'Student profile not found'], 404);
         }
 
-        if ($student->cv_path) {
-            Storage::disk('public')->delete($student->cv_path);
-        }
+        if ($student->cv_path) Storage::disk('public')->delete($student->cv_path);
 
         $path = $request->file('cv')->store('cvs', 'public');
         $student->update(['cv_path' => $path]);
 
-        return response()->json([
-            'message' => 'CV uploaded successfully',
-            'cv_path' => $path,
-        ]);
+        return response()->json(['message' => 'CV uploaded successfully', 'cv_path' => $path]);
+    }
+
+    /**
+     * Delete student CV
+     */
+    public function deleteCv(Request $request)
+    {
+        $user    = $request->user();
+        $student = \App\Models\Student::where('user_id', $user->id)->first();
+
+        if (!$student) return response()->json(['message' => 'Student profile not found'], 404);
+
+        if ($student->cv_path) {
+            Storage::disk('public')->delete($student->cv_path);
+            $student->update(['cv_path' => null]);
+        }
+
+        return response()->json(['message' => 'CV deleted successfully']);
     }
 }

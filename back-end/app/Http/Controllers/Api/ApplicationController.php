@@ -3,68 +3,88 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Application;
+use App\Models\Evaluation;
 use App\Models\Student;
 use App\Models\Company;
-use App\Models\Offer;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class ApplicationController extends Controller
 {
     /**
-     * Get all applications for the authenticated user
+     * Get applications
+     * - Company: all applications for their offers
+     * - Student: their own applications
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $user = $request->user();
 
-        if ($user->role === 'student') {
-            $student = Student::where('user_id', $user->id)->first();
-            
-            if (!$student) {
-                return response()->json(['message' => 'Student profile not found'], 404);
-            }
-            
-            $applications = Application::with(['offer.company.user'])
-                ->where('student_id', $student->id)
-                ->latest()
-                ->get();
-                
-            return response()->json($applications);
-            
-        } elseif ($user->role === 'company') {
+        if ($user->role === 'company') {
             $company = Company::where('user_id', $user->id)->first();
-            
-            if (!$company) {
-                return response()->json(['message' => 'Company profile not found'], 404);
-            }
-            
-            $applications = Application::with(['student.user', 'offer'])
-                ->whereHas('offer', function($q) use ($company) {
+            if (!$company) return response()->json([]);
+
+            $applications = Application::whereHas('offer', function($q) use ($company) {
                     $q->where('company_id', $company->id);
                 })
-                ->latest()
+                ->with([
+                    'student.user',
+                    'student',
+                    'offer',
+                    'evaluation', // company's evaluation of this application
+                ])
+                ->orderBy('applied_at', 'desc')
                 ->get();
-                
-            return response()->json($applications);
-            
-        } elseif ($user->role === 'admin') {
-            $applications = Application::with(['student.user', 'offer.company.user'])
-                ->latest()
-                ->paginate(20);
-                
+
             return response()->json($applications);
         }
 
-        return response()->json(['message' => 'Unauthorized'], 403);
+        if ($user->role === 'student') {
+            $student = Student::where('user_id', $user->id)->first();
+            if (!$student) return response()->json([]);
+
+            $applications = Application::where('student_id', $student->id)
+                ->with(['offer.company', 'evaluation'])
+                ->orderBy('applied_at', 'desc')
+                ->get();
+
+            return response()->json($applications);
+        }
+
+        return response()->json([]);
     }
 
     /**
-     * Create a new application (for students)
+     * Get single application
      */
-    public function store(Request $request): JsonResponse
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        $application = Application::with(['student.user', 'student', 'offer.company'])->find($id);
+
+        if (!$application) return response()->json(['message' => 'Not found'], 404);
+
+        // Only company that owns the offer or the student who applied can view
+        $company = $user->role === 'company'
+            ? Company::where('user_id', $user->id)->first()
+            : null;
+        $student = $user->role === 'student'
+            ? Student::where('user_id', $user->id)->first()
+            : null;
+
+        $canView = ($company && $application->offer->company_id === $company->id)
+                || ($student && $application->student_id === $student->id);
+
+        if (!$canView) return response()->json(['message' => 'Unauthorized'], 403);
+
+        return response()->json($application);
+    }
+
+    /**
+     * Submit application (student only)
+     */
+    public function store(Request $request)
     {
         $user = $request->user();
 
@@ -73,8 +93,8 @@ class ApplicationController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'offer_id' => 'required|exists:offers,id',
-            'cover_letter' => 'nullable|string|max:5000',
+            'offer_id'     => 'required|integer|exists:offers,id',
+            'cover_letter' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -82,240 +102,156 @@ class ApplicationController extends Controller
         }
 
         $student = Student::where('user_id', $user->id)->first();
-
         if (!$student) {
-            return response()->json(['message' => 'Student profile not found'], 404);
+            return response()->json(['message' => 'Student profile not found. Please complete your profile first.'], 404);
         }
 
-        // Check if already applied
+        // Check for duplicate application
         $existing = Application::where('student_id', $student->id)
             ->where('offer_id', $request->offer_id)
             ->first();
 
         if ($existing) {
-            return response()->json(['message' => 'You have already applied to this offer'], 400);
-        }
-
-        // Check if offer exists and is approved
-        $offer = Offer::find($request->offer_id);
-        if (!$offer || $offer->status !== 'approved') {
-            return response()->json(['message' => 'This offer is not available'], 400);
+            return response()->json(['message' => 'Vous avez déjà postulé à cette offre'], 422);
         }
 
         $application = Application::create([
-            'student_id' => $student->id,
-            'offer_id' => $request->offer_id,
+            'student_id'   => $student->id,
+            'offer_id'     => $request->offer_id,
             'cover_letter' => $request->cover_letter,
-            'cv_file' => $student->cv_path, // Automatically attach student's CV
-            'status' => 'pending',
+            'status'       => 'pending',
+            'applied_at'   => now(),
         ]);
 
         return response()->json([
-            'message' => 'Application submitted successfully',
-            'application' => $application->load(['offer.company.user'])
+            'message'     => 'Candidature envoyée avec succès',
+            'application' => $application->load(['offer.company', 'student.user']),
         ], 201);
     }
 
     /**
-     * Get a specific application
+     * Update application status (company or admin)
      */
-    public function show(Request $request, $id): JsonResponse
+    public function update(Request $request, $id)
     {
         $user = $request->user();
-        
-        $application = Application::with(['student.user', 'offer.company.user'])->find($id);
-
-        if (!$application) {
-            return response()->json(['message' => 'Application not found'], 404);
-        }
-
-        // Check authorization
-        if ($user->role === 'student') {
-            $student = Student::where('user_id', $user->id)->first();
-            if ($application->student_id !== $student->id) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-        } elseif ($user->role === 'company') {
-            $company = Company::where('user_id', $user->id)->first();
-            if ($application->offer->company_id !== $company->id) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-        } elseif ($user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        return response()->json($application);
-    }
-
-    /**
-     * Update application status (for companies)
-     */
-    public function update(Request $request, $id): JsonResponse
-    {
-        $user = $request->user();
-
-        if ($user->role !== 'company' && $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:accepted,rejected',
-            'reason' => 'nullable|string|max:1000',
+            'status' => 'required|in:accepted,rejected,pending',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        if ($validator->fails()) return response()->json(['errors' => $validator->errors()], 422);
 
         $application = Application::with('offer')->find($id);
+        if (!$application) return response()->json(['message' => 'Not found'], 404);
 
-        if (!$application) {
-            return response()->json(['message' => 'Application not found'], 404);
-        }
-
-        // If company, check if they own the offer
+        // Verify company owns this offer
         if ($user->role === 'company') {
             $company = Company::where('user_id', $user->id)->first();
-            if ($application->offer->company_id !== $company->id) {
+            if (!$company || $application->offer->company_id !== $company->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
         }
 
-        $application->update([
-            'status' => $request->status,
-            'rejection_reason' => $request->reason ?? null,
-        ]);
-
-        // Optionally create a message/conversation when accepted
-        if ($request->status === 'accepted') {
-            // You could automatically create a conversation here
-            // This would allow the company and student to message each other
-        }
-
-        return response()->json([
-            'message' => 'Application status updated successfully',
-            'application' => $application->fresh(['student.user', 'offer.company.user'])
-        ]);
+        $application->update(['status' => $request->status]);
+        return response()->json(['message' => 'Status updated', 'application' => $application]);
     }
 
     /**
-     * Withdraw an application (for students)
+     * Withdraw application (student only)
      */
-    public function withdraw(Request $request, $id): JsonResponse
+    public function withdraw(Request $request, $id)
     {
         $user = $request->user();
-
-        if ($user->role !== 'student') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $student = Student::where('user_id', $user->id)->first();
-        $application = Application::where('id', $id)
-            ->where('student_id', $student->id)
-            ->first();
-
-        if (!$application) {
-            return response()->json(['message' => 'Application not found'], 404);
-        }
-
-        if ($application->status !== 'pending') {
-            return response()->json(['message' => 'Cannot withdraw application that is already processed'], 400);
-        }
-
-        $application->update(['status' => 'withdrawn']);
-
-        return response()->json(['message' => 'Application withdrawn successfully']);
-    }
-
-    /**
-     * Delete an application (admin only)
-     */
-    public function destroy(Request $request, $id): JsonResponse
-    {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
 
         $application = Application::find($id);
-
-        if (!$application) {
-            return response()->json(['message' => 'Application not found'], 404);
+        if (!$application) return response()->json(['message' => 'Not found'], 404);
+        if (!$student || $application->student_id !== $student->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $application->delete();
-
-        return response()->json(['message' => 'Application deleted successfully']);
+        return response()->json(['message' => 'Candidature retirée']);
     }
 
     /**
-     * Get statistics about applications (for companies)
+     * Delete application (admin only)
      */
-    public function statistics(Request $request): JsonResponse
+    public function destroy(Request $request, $id)
+    {
+        $application = Application::find($id);
+        if (!$application) return response()->json(['message' => 'Not found'], 404);
+        $application->delete();
+        return response()->json(['message' => 'Application deleted']);
+    }
+
+    /**
+     * Get statistics
+     */
+    public function statistics(Request $request)
     {
         $user = $request->user();
-
-        if ($user->role !== 'company' && $user->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $query = Application::query();
 
         if ($user->role === 'company') {
             $company = Company::where('user_id', $user->id)->first();
-            $query->whereHas('offer', function($q) use ($company) {
-                $q->where('company_id', $company->id);
-            });
+            if (!$company) return response()->json([]);
+
+            $offerIds = $company->offers()->pluck('id');
+            return response()->json([
+                'total'    => Application::whereIn('offer_id', $offerIds)->count(),
+                'pending'  => Application::whereIn('offer_id', $offerIds)->where('status', 'pending')->count(),
+                'accepted' => Application::whereIn('offer_id', $offerIds)->where('status', 'accepted')->count(),
+                'rejected' => Application::whereIn('offer_id', $offerIds)->where('status', 'rejected')->count(),
+            ]);
         }
 
-        $stats = [
-            'total' => $query->count(),
-            'pending' => (clone $query)->where('status', 'pending')->count(),
-            'accepted' => (clone $query)->where('status', 'accepted')->count(),
-            'rejected' => (clone $query)->where('status', 'rejected')->count(),
-            'withdrawn' => (clone $query)->where('status', 'withdrawn')->count(),
-            'today' => (clone $query)->whereDate('created_at', today())->count(),
-            'thisWeek' => (clone $query)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
-            'thisMonth' => (clone $query)->whereMonth('created_at', date('m'))->count(),
-        ];
-
-        return response()->json($stats);
+        return response()->json([]);
     }
 
     /**
-     * Bulk update application status (for companies)
+     * Submit or update evaluation for an application (company only)
      */
-    public function bulkUpdate(Request $request): JsonResponse
+    public function submitEvaluation(Request $request, $applicationId)
     {
-        $user = $request->user();
+        $user    = $request->user();
+        $company = Company::where('user_id', $user->id)->first();
 
-        if ($user->role !== 'company' && $user->role !== 'admin') {
+        if (!$company) return response()->json(['message' => 'Unauthorized'], 403);
+
+        $application = Application::with('offer')->find($applicationId);
+        if (!$application) return response()->json(['message' => 'Not found'], 404);
+        if ($application->offer->company_id !== $company->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $evaluation = Evaluation::updateOrCreate(
+            ['application_id' => $applicationId],
+            [
+                'overall'       => $request->overall       ?? 0,
+                'technical'     => $request->technical     ?? 0,
+                'communication' => $request->communication ?? 0,
+                'teamwork'      => $request->teamwork       ?? 0,
+                'initiative'    => $request->initiative     ?? 0,
+                'comment'       => $request->comment,
+                'completed'     => $request->completed     ?? false,
+                'certificate'   => $request->certificate   ?? false,
+                'start_date'    => $request->start_date,
+                'end_date'      => $request->end_date,
+            ]
+        );
+
+        return response()->json(['message' => 'Evaluation saved', 'evaluation' => $evaluation]);
+    }
+
+    public function bulkUpdate(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'application_ids' => 'required|array|min:1',
-            'application_ids.*' => 'exists:applications,id',
-            'status' => 'required|in:accepted,rejected',
+            'ids'    => 'required|array',
+            'status' => 'required|in:accepted,rejected,pending',
         ]);
+        if ($validator->fails()) return response()->json(['errors' => $validator->errors()], 422);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $query = Application::whereIn('id', $request->application_ids);
-
-        // If company, verify they own all these applications
-        if ($user->role === 'company') {
-            $company = Company::where('user_id', $user->id)->first();
-            $query->whereHas('offer', function($q) use ($company) {
-                $q->where('company_id', $company->id);
-            });
-        }
-
-        $count = $query->update(['status' => $request->status]);
-
-        return response()->json([
-            'message' => "{$count} applications updated successfully"
-        ]);
+        Application::whereIn('id', $request->ids)->update(['status' => $request->status]);
+        return response()->json(['message' => 'Applications updated']);
     }
 }

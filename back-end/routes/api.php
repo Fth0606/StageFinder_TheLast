@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/applications', [ProfileController::class, 'applications']);
     
     // Profiles
     Route::prefix('profile')->group(function () {
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/student', [ProfileController::class, 'completeStudentProfile']);
         Route::post('/company', [ProfileController::class, 'completeCompanyProfile']);
         Route::post('/upload-cv', [ProfileController::class, 'uploadCv']);
+        Route::delete('/delete-cv', [ProfileController::class, 'deleteCv']);
         Route::get('/download-cv/{userId}', [ProfileController::class, 'downloadCv']);
     });
     
@@ -45,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/applications', [ApplicationController::class, 'store'])->middleware('role:student');
     Route::put('/applications/{id}', [ApplicationController::class, 'update'])->middleware('role:company,admin');
     Route::post('/applications/bulk-update', [ApplicationController::class, 'bulkUpdate'])->middleware('role:company,admin');
+    Route::post('/applications/{id}/evaluation', [ApplicationController::class, 'submitEvaluation'])->middleware('role:company');
     Route::post('/applications/{id}/withdraw', [ApplicationController::class, 'withdraw'])->middleware('role:student');
     Route::delete('/applications/{id}', [ApplicationController::class, 'destroy'])->middleware('role:admin');
     

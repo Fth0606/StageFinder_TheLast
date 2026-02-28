@@ -10,21 +10,18 @@ class Company extends Model
 {
     protected $table = 'companies';
 
+    public $timestamps = false; // companies table has no created_at/updated_at
+
     protected $fillable = [
-        'user_id', 'company_name', 'industry', 'location', 'description', 'website', 'logo_path'
+        'user_id', 'company_name', 'industry', 'location',
+        'description', 'website', 'logo_path', 'phone',
     ];
 
-    /**
-     * Get the user that owns the company profile.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the offers for the company.
-     */
     public function offers(): HasMany
     {
         return $this->hasMany(Offer::class);
