@@ -1,39 +1,102 @@
 .stagesListPage {
-  background: #f8f9fa;
-  min-height: 100vh;
-  padding: 3rem 0;
+  min-height: calc(100vh - 80px);
+  background-color: var(--bg-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.bgBlob1 {
+  position: absolute;
+  top: 5%;
+  left: -5%;
+  width: 500px;
+  height: 500px;
+  background: var(--primary-color);
+  filter: blur(150px);
+  opacity: 0.08;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bgBlob2 {
+  position: absolute;
+  bottom: 10%;
+  right: -5%;
+  width: 600px;
+  height: 600px;
+  background: var(--accent-color);
+  filter: blur(150px);
+  opacity: 0.08;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.searchContainer {
+  background: white;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
+  transform: translateY(-20px);
+  opacity: 0;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.2s;
 }
 
 .filterSidebar {
+  padding: 2rem;
   background: white;
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+  height: 100%;
   position: sticky;
   top: 100px;
 }
 
-.filterSidebar h5 {
-  color: #0066CC;
-  margin-bottom: 1.5rem;
-  font-weight: bold;
-}
-
-.stagesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.noResults {
-  text-align: center;
-  padding: 3rem;
-  color: #6c757d;
-}
-
-.loadingSpinner {
+.customRadio,
+.customCheckbox {
+  margin-bottom: 0.8rem;
+  color: #475569;
+  font-weight: 500;
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 400px;
+}
+
+.customRadio input[type="radio"],
+.customCheckbox input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.customRadio label,
+.customCheckbox label {
+  cursor: pointer;
+}
+
+.activeTag {
+  color: var(--primary-color) !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+}
+
+@keyframes slideUpFade {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

@@ -162,7 +162,7 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'company_name' => 'required|string|max:150',
             'industry'     => 'nullable|string|max:100',
-            'location'     => 'required|string|max:150',
+            'location'     => 'nullable|string|max:150',
             'description'  => 'required|string',
             'website'      => 'nullable|string|max:255',
         ]);

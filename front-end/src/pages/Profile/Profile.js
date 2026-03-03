@@ -1,48 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Alert, Modal, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Button, Badge, Alert, Modal, ProgressBar } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaBriefcase, FaGraduationCap, FaFilePdf, FaUpload, FaDownload,
-         FaTrash, FaCheckCircle, FaMapMarkerAlt, FaPhone, FaStar, FaTrophy, FaMedal } from 'react-icons/fa';
+import {
+  FaEdit, FaBriefcase, FaGraduationCap, FaFilePdf, FaUpload, FaDownload,
+  FaTrash, FaCheckCircle, FaMapMarkerAlt, FaPhone, FaStar, FaTrophy, FaMedal
+} from 'react-icons/fa';
 import { fetchUserProfile, fetchUserApplications } from '../../store/slices/userSlice';
 import api from '../../services/api';
 
-// ── Star display (read-only) ──────────────────────────────────────────────────
 const StarDisplay = ({ value, max = 5 }) => (
   <span>
     {Array.from({ length: max }, (_, i) => (
-      <FaStar key={i} style={{ color: i < value ? '#FFC107' : '#dee2e6', fontSize: '1rem' }} />
+      <FaStar key={i} style={{ color: i < value ? '#fbbf24' : '#e2e8f0', fontSize: '1rem' }} />
     ))}
-    <small className="ms-1 text-muted">{value}/{max}</small>
+    <small className="ms-1" style={{ color: '#94a3b8', fontWeight: 'bold' }}>{value}/{max}</small>
   </span>
 );
 
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user }                      = useSelector((state) => state.auth);
-  const { profile, applications }     = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.auth);
+  const { profile, applications } = useSelector((state) => state.user);
 
-  const [showCvModal, setShowCvModal]       = useState(false);
-  const [uploadSuccess, setUploadSuccess]   = useState(false);
-  const [cvError, setCvError]               = useState('');
-  const [uploading, setUploading]           = useState(false);
+  const [showCvModal, setShowCvModal] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [cvError, setCvError] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchUserProfile());
     dispatch(fetchUserApplications());
   }, [dispatch]);
 
-  // ── Data helpers ──────────────────────────────────────────────────────────
-  const student    = profile?.student || user?.student || null;
+  const student = profile?.student || user?.student || null;
   const university = student?.university || null;
   const specialite = student?.specialite || null;
-  const location   = student?.location   || null;
-  const phone      = student?.phone      || null;
-  const bio        = profile?.bio        || user?.bio  || null;
-  const cvPath     = student?.cv_path    || null; // DB column in students table
+  const location = student?.location || null;
+  const phone = student?.phone || null;
+  const bio = profile?.bio || user?.bio || null;
+  const cvPath = student?.cv_path || null;
 
-  // Skills: DB stores as JSON string OR array (cast handles it, but be safe)
   const parseSkills = (raw) => {
     if (!raw) return [];
     if (Array.isArray(raw)) return raw;
@@ -51,15 +50,13 @@ const Profile = () => {
   };
   const skills = parseSkills(student?.skills);
 
-  // ── CV upload to server ───────────────────────────────────────────────────
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const allowed = ['application/pdf', 'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowed.includes(file.type)) { setCvError('Format non supporté. PDF, DOC ou DOCX uniquement.'); return; }
-    if (file.size > 5 * 1024 * 1024)  { setCvError('Fichier trop volumineux (max 5MB).'); return; }
+    if (file.size > 5 * 1024 * 1024) { setCvError('Fichier trop volumineux (max 5MB).'); return; }
 
     setCvError('');
     setUploading(true);
@@ -67,11 +64,9 @@ const Profile = () => {
     try {
       const formData = new FormData();
       formData.append('cv', file);
-      await api.post('/profile/upload-cv', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post('/profile/upload-cv', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setUploadSuccess(true);
-      dispatch(fetchUserProfile()); // refresh to get new cv_path
+      dispatch(fetchUserProfile());
       setTimeout(() => { setUploadSuccess(false); setShowCvModal(false); }, 2000);
     } catch (err) {
       setCvError(err.response?.data?.message || 'Erreur lors de l\'upload.');
@@ -84,17 +79,15 @@ const Profile = () => {
     try {
       await api.delete('/profile/delete-cv');
       dispatch(fetchUserProfile());
-    } catch {
-      // silently ignore
-    }
+    } catch { }
   };
 
   const roleBadge = () => {
     const role = user?.role;
-    if (role === 'student') return { bg: 'info',    text: 'Étudiant' };
-    if (role === 'company') return { bg: 'success', text: 'Entreprise' };
-    if (role === 'admin')   return { bg: 'danger',  text: 'Admin' };
-    return { bg: 'secondary', text: role || 'Utilisateur' };
+    if (role === 'student') return { text: 'Étudiant', color: 'var(--primary-color)', bg: 'rgba(99, 102, 241, 0.1)' };
+    if (role === 'company') return { text: 'Entreprise', color: 'var(--accent-color)', bg: 'rgba(14, 165, 233, 0.1)' };
+    if (role === 'admin') return { text: 'Admin', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' };
+    return { text: role || 'Utilisateur', color: '#64748b', bg: '#f1f5f9' };
   };
   const badge = roleBadge();
 
@@ -104,289 +97,314 @@ const Profile = () => {
     return isNaN(dt.getTime()) ? 'N/A' : dt.toLocaleDateString('fr-FR');
   };
 
-  // ── Evaluation helpers ────────────────────────────────────────────────────
-  const getEval    = (app) => app?.evaluation || null;
-  const avgScore   = (ev)  => {
+  const getEval = (app) => app?.evaluation || null;
+  const avgScore = (ev) => {
     if (!ev) return 0;
     const vals = [ev.overall, ev.technical, ev.communication, ev.teamwork, ev.initiative].filter(v => v > 0);
     return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : 0;
   };
   const scoreLabel = (s) => {
-    if (s >= 4.5) return { text: '🏆 Excellent',    color: '#00C853' };
-    if (s >= 3.5) return { text: '✅ Très bien',     color: '#0066CC' };
-    if (s >= 2.5) return { text: '👍 Bien',          color: '#FFA726' };
-    if (s >= 1.5) return { text: '⚠️ Passable',     color: '#FF7043' };
-    return             { text: '❌ Insuffisant',     color: '#dc3545' };
+    if (s >= 4.5) return { text: '🏆 Excellent', color: '#10b981' };
+    if (s >= 3.5) return { text: '✅ Très bien', color: '#3b82f6' };
+    if (s >= 2.5) return { text: '👍 Bien', color: '#f59e0b' };
+    if (s >= 1.5) return { text: '⚠️ Passable', color: '#f97316' };
+    return { text: '❌ Insuffisant', color: '#ef4444' };
   };
 
   return (
-    <Container style={{ background: '#f8f9fa', minHeight: '100vh', padding: '3rem 0' }}>
-      <Row>
-        {/* ── Left column ───────────────────────────────────────────────── */}
-        <Col lg={4} className="mb-4">
+    <div style={{ minHeight: 'calc(100vh - 80px)', background: 'var(--bg-light)', position: 'relative', overflow: 'hidden', padding: '3rem 0' }}>
+      {/* Dynamic Backgrounds */}
+      <div style={{ position: 'absolute', top: '5%', left: '-5%', width: '400px', height: '400px', background: 'var(--primary-color)', filter: 'blur(150px)', opacity: '0.08', borderRadius: '50%', zIndex: 0 }}></div>
+      <div style={{ position: 'absolute', bottom: '10%', right: '-5%', width: '500px', height: '500px', background: 'var(--secondary-color)', filter: 'blur(150px)', opacity: '0.08', borderRadius: '50%', zIndex: 0 }}></div>
 
-          {/* Profile card */}
-          <Card style={{ border:'none', borderRadius:'20px', boxShadow:'0 5px 20px rgba(0,0,0,0.1)', marginBottom:'1.5rem' }}>
-            <Card.Body className="text-center p-4">
+      <Container style={{ position: 'relative', zIndex: 1 }}>
+        <Row className="g-4">
+          {/* Left column */}
+          <Col lg={4}>
+            {/* Profile card */}
+            <div className="glass-panel text-center p-4 mb-4">
               <div style={{
-                width:'120px', height:'120px', borderRadius:'50%', margin:'0 auto 1rem',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                background:'linear-gradient(135deg, #0066CC, #00C853)',
-                color:'white', fontSize:'2.5rem', fontWeight:'bold',
-                boxShadow:'0 5px 20px rgba(0,0,0,0.1)', overflow:'hidden'
+                width: '120px', height: '120px', borderRadius: '24px', margin: '0 auto 1.5rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                color: 'white', fontSize: '2.5rem', fontWeight: 'bold',
+                boxShadow: '0 15px 30px rgba(99, 102, 241, 0.3)', overflow: 'hidden'
               }}>
                 {user?.profile_picture
-                  ? <img src={`http://localhost:8000/storage/${user.profile_picture}`} alt={user?.name}
-                      style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                  ? <img src={`http://localhost:8000/storage/${user.profile_picture}`} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <span>{user?.name?.charAt(0)?.toUpperCase()}</span>}
               </div>
 
-              <h4>{user?.name}</h4>
-              <p className="text-muted mb-1">{user?.email}</p>
+              <h3 style={{ fontWeight: '800', color: 'var(--bg-dark)', marginBottom: '0.2rem' }}>{user?.name}</h3>
+              <p style={{ color: '#64748b', marginBottom: '1rem', fontWeight: '500' }}>{user?.email}</p>
 
-              {/* Phone — DB: students.phone */}
-              {phone && (
-                <p className="text-muted mb-1" style={{ fontSize:'0.9rem' }}>
-                  <FaPhone className="me-1" />{phone}
-                </p>
-              )}
-              {/* Location — DB: students.location */}
-              {location && (
-                <p className="text-muted mb-2" style={{ fontSize:'0.9rem' }}>
-                  <FaMapMarkerAlt className="me-1" />{location}
-                </p>
-              )}
+              <div className="d-flex justify-content-center gap-2 mb-4">
+                {phone && (
+                  <Badge bg="transparent" style={{ color: '#475569', background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+                    <FaPhone style={{ color: 'var(--primary-color)', marginRight: '6px' }} /> {phone}
+                  </Badge>
+                )}
+                {location && (
+                  <Badge bg="transparent" style={{ color: '#475569', background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+                    <FaMapMarkerAlt style={{ color: 'var(--accent-color)', marginRight: '6px' }} /> {location}
+                  </Badge>
+                )}
+              </div>
 
-              <Badge bg={badge.bg} className="mb-3" style={{ fontSize:'0.9rem', padding:'0.5rem 1rem' }}>
+              <div style={{ display: 'inline-block', color: badge.color, background: badge.bg, padding: '6px 16px', borderRadius: '50px', fontWeight: '700', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
                 {badge.text}
-              </Badge>
+              </div>
 
               {bio && (
-                <p className="text-muted small mb-3" style={{ fontStyle:'italic' }}>"{bio}"</p>
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '1.5rem', fontStyle: 'italic', color: '#475569', fontSize: '0.95rem' }}>
+                  "{bio}"
+                </div>
               )}
 
-              <Button variant="primary" className="w-100"
-                onClick={() => navigate('/edit-profile')}
-                style={{ backgroundColor:'#0066CC', borderColor:'#0066CC', borderRadius:'10px', padding:'0.75rem', fontWeight:'600' }}>
-                <FaEdit className="me-2" />Modifier le profil
-              </Button>
-            </Card.Body>
-          </Card>
+              <button className="btn-modern btn-modern-primary w-100" onClick={() => navigate('/edit-profile')}>
+                <FaEdit className="me-2" /> Modifier le profil
+              </button>
+            </div>
 
-          {/* CV card — uploads to server, not localStorage */}
-          <Card style={{ border:'none', borderRadius:'20px', boxShadow:'0 5px 20px rgba(0,0,0,0.1)' }}>
-            <Card.Header style={{ background:'linear-gradient(135deg, #00C853, #00A844)', color:'white', borderRadius:'20px 20px 0 0', padding:'1rem' }}>
-              <h6 className="mb-0"><FaFilePdf className="me-2" />Mon CV</h6>
-            </Card.Header>
-            <Card.Body style={{ padding:'1.5rem' }}>
-              {cvPath ? (
-                <div>
-                  <div style={{ backgroundColor:'#f8f9fa', borderRadius:'12px', padding:'1rem', marginBottom:'1rem', border:'2px solid #00C853' }}>
-                    <div className="d-flex align-items-center">
-                      <FaFilePdf style={{ color:'#dc3545', fontSize:'2rem', marginRight:'1rem' }} />
-                      <div className="flex-grow-1">
-                        <div style={{ fontWeight:'600', fontSize:'0.9rem' }}>
+            {/* CV card */}
+            <div className="glass-panel p-0 overflow-hidden">
+              <div style={{ background: 'linear-gradient(135deg, var(--accent-color), #0284c7)', padding: '1.2rem 1.5rem', color: 'white' }}>
+                <h6 style={{ margin: 0, fontWeight: '700', display: 'flex', alignItems: 'center' }}><FaFilePdf className="me-2" /> Mon CV</h6>
+              </div>
+              <div style={{ padding: '1.5rem' }}>
+                {cvPath ? (
+                  <div>
+                    <div style={{ backgroundColor: 'rgba(14, 165, 233, 0.05)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', border: '1px solid rgba(14, 165, 233, 0.2)', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginRight: '1rem' }}>
+                        <FaFilePdf />
+                      </div>
+                      <div className="flex-grow-1" style={{ overflow: 'hidden' }}>
+                        <div style={{ fontWeight: '600', color: 'var(--bg-dark)', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {cvPath.split('/').pop()}
                         </div>
-                        <small className="text-muted">CV enregistré sur le serveur</small>
+                        <small style={{ color: '#10b981', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+                          <FaCheckCircle className="me-1" /> Sauvegardé
+                        </small>
                       </div>
-                      <FaCheckCircle style={{ color:'#00C853', fontSize:'1.5rem' }} />
+                    </div>
+                    <div className="d-flex flex-column gap-2">
+                      <button onClick={() => window.open(`http://localhost:8000/storage/${cvPath}`, '_blank')} style={{ background: 'white', color: 'var(--accent-color)', border: '1px solid var(--accent-color)', borderRadius: '10px', padding: '0.6rem', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-color)'; e.currentTarget.style.color = 'white'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = 'var(--accent-color)'; }}>
+                        <FaDownload className="me-2" /> Télécharger
+                      </button>
+                      <button onClick={() => setShowCvModal(true)} style={{ background: 'white', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.6rem', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary-color)'; e.currentTarget.style.color = 'var(--primary-color)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#64748b'; }}>
+                        <FaUpload className="me-2" /> Remplacer
+                      </button>
+                      <button onClick={handleDeleteCv} style={{ background: 'white', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', padding: '0.6rem', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#ef4444'; }}>
+                        <FaTrash className="me-2" /> Supprimer
+                      </button>
                     </div>
                   </div>
-                  <div className="d-grid gap-2">
-                    <Button variant="outline-success"
-                      href={`http://localhost:8000/storage/${cvPath}`} target="_blank"
-                      style={{ borderRadius:'10px' }}>
-                      <FaDownload className="me-2" />Télécharger
-                    </Button>
-                    <Button variant="outline-primary" onClick={() => setShowCvModal(true)} style={{ borderRadius:'10px' }}>
-                      <FaUpload className="me-2" />Remplacer
-                    </Button>
-                    <Button variant="outline-danger" onClick={handleDeleteCv} style={{ borderRadius:'10px' }}>
-                      <FaTrash className="me-2" />Supprimer
-                    </Button>
+                ) : (
+                  <div className="text-center py-3">
+                    <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#f1f5f9', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1rem' }}>
+                      <FaFilePdf />
+                    </div>
+                    <p style={{ color: '#64748b', fontWeight: '500', marginBottom: '1.5rem' }}>Aucun CV ajouté</p>
+                    <button onClick={() => setShowCvModal(true)} style={{ background: 'var(--accent-color)', border: 'none', color: 'white', borderRadius: '10px', padding: '0.8rem 1.5rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', boxShadow: '0 4px 12px rgba(14, 165, 233, 0.2)', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                      <FaUpload className="me-2" /> Ajouter mon CV
+                    </button>
+                    <small style={{ display: 'block', marginTop: '1rem', color: '#94a3b8' }}>PDF, DOC ou DOCX (max 5MB)</small>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <FaFilePdf style={{ fontSize:'3rem', color:'#ccc', marginBottom:'1rem' }} />
-                  <p className="text-muted mb-3">Aucun CV ajouté</p>
-                  <Button variant="success" onClick={() => setShowCvModal(true)}
-                    style={{ backgroundColor:'#00C853', borderColor:'#00C853', borderRadius:'10px', padding:'0.75rem 1.5rem' }}>
-                    <FaUpload className="me-2" />Ajouter mon CV
-                  </Button>
-                  <small className="d-block mt-2 text-muted">PDF, DOC ou DOCX (max 5MB)</small>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
+                )}
+              </div>
+            </div>
+          </Col>
 
-        {/* ── Right column ──────────────────────────────────────────────── */}
-        <Col lg={8}>
-
-          {/* About card */}
-          <Card className="mb-4" style={{ border:'none', borderRadius:'20px', boxShadow:'0 5px 20px rgba(0,0,0,0.1)' }}>
-            <Card.Header style={{ background:'white', borderBottom:'2px solid #e9ecef', borderRadius:'20px 20px 0 0', padding:'1.5rem' }}>
-              <h5 className="mb-0" style={{ color:'#0066CC' }}>
-                <FaGraduationCap className="me-2" />À propos
+          {/* Right column */}
+          <Col lg={8}>
+            {/* About card */}
+            <div className="glass-panel p-4 mb-4">
+              <h5 style={{ fontWeight: '700', color: 'var(--bg-dark)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                  <FaGraduationCap size={16} />
+                </div>
+                À propos
               </h5>
-            </Card.Header>
-            <Card.Body style={{ padding:'1.5rem' }}>
-              <Row>
-                <Col md={6} className="mb-3">
-                  <strong>Université / École :</strong>
-                  <p className="text-muted">{university || 'Non renseigné'}</p>
+
+              <Row className="g-4">
+                <Col md={6}>
+                  <div style={{ background: '#f8fafc', padding: '1rem 1.2rem', borderRadius: '12px', border: '1px solid #e2e8f0', height: '100%' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.5px', display: 'block', marginBottom: '5px' }}>Université / École</span>
+                    <strong style={{ color: 'var(--bg-dark)', fontSize: '1.05rem' }}>{university || 'Non renseigné'}</strong>
+                  </div>
                 </Col>
-                <Col md={6} className="mb-3">
-                  <strong>Spécialité :</strong>
-                  <p className="text-muted">{specialite || 'Non renseigné'}</p>
+                <Col md={6}>
+                  <div style={{ background: '#f8fafc', padding: '1rem 1.2rem', borderRadius: '12px', border: '1px solid #e2e8f0', height: '100%' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.5px', display: 'block', marginBottom: '5px' }}>Spécialité</span>
+                    <strong style={{ color: 'var(--bg-dark)', fontSize: '1.05rem' }}>{specialite || 'Non renseigné'}</strong>
+                  </div>
                 </Col>
                 <Col md={12}>
-                  <strong>Compétences :</strong>
-                  <div className="mt-2">
-                    {skills.length > 0
-                      ? skills.map((s, i) => (
-                          <Badge key={i} bg="primary" className="me-2 mb-2"
-                            style={{ backgroundColor:'#0066CC', padding:'0.5rem 0.75rem', fontSize:'0.85rem' }}>
-                            {s}
-                          </Badge>
-                        ))
-                      : <p className="text-muted">Aucune compétence ajoutée</p>}
+                  <div style={{ background: '#f8fafc', padding: '1.2rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.5px', display: 'block', marginBottom: '10px' }}>Compétences clés</span>
+                    <div className="d-flex flex-wrap gap-2">
+                      {skills.length > 0 ? skills.map((s, i) => (
+                        <div key={i} style={{ background: 'white', color: 'var(--primary-color)', border: '1px solid rgba(99, 102, 241, 0.2)', padding: '6px 14px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: '600', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                          {s}
+                        </div>
+                      )) : <p className="text-muted m-0" style={{ fontSize: '0.9rem' }}>Aucune compétence ajoutée</p>}
+                    </div>
                   </div>
                 </Col>
               </Row>
-            </Card.Body>
-          </Card>
+            </div>
 
-          {/* Applications card */}
-          <Card className="mb-4" style={{ border:'none', borderRadius:'20px', boxShadow:'0 5px 20px rgba(0,0,0,0.1)' }}>
-            <Card.Header style={{ background:'white', borderBottom:'2px solid #e9ecef', borderRadius:'20px 20px 0 0', padding:'1.5rem' }}>
-              <h5 className="mb-0" style={{ color:'#0066CC' }}>
-                <FaBriefcase className="me-2" />
+            {/* Applications card */}
+            <div className="glass-panel p-4 pb-2">
+              <h5 style={{ fontWeight: '700', color: 'var(--bg-dark)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(236, 72, 153, 0.1)', color: 'var(--secondary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                  <FaBriefcase size={16} />
+                </div>
                 Mes Candidatures ({Array.isArray(applications) ? applications.length : 0})
               </h5>
-            </Card.Header>
-            <Card.Body style={{ padding:'1.5rem' }}>
+
               {Array.isArray(applications) && applications.length > 0 ? (
                 applications.map((app) => {
-                  const ev  = getEval(app);
+                  const ev = getEval(app);
                   const avg = avgScore(ev);
                   const lbl = scoreLabel(avg);
+
+                  const getStatusBadge = (status) => {
+                    if (status === 'accepted') return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10b981', text: 'Accepté' };
+                    if (status === 'rejected') return { bg: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', text: 'Refusé' };
+                    return { bg: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', text: 'En attente' };
+                  };
+                  const statusBadge = getStatusBadge(app.status);
+
                   return (
-                    <div key={app.id} className="mb-3 p-3"
-                      style={{ backgroundColor:'#f8f9fa', borderRadius:'12px', border:'1px solid #e9ecef' }}>
-                      <div className="d-flex justify-content-between align-items-start">
-                        <div style={{ flex:1 }}>
-                          <h6 className="mb-1">{app.offer?.title || 'N/A'}</h6>
-                          <p className="text-muted mb-1" style={{ fontSize:'0.9rem' }}>
-                            {app.offer?.company?.company_name || 'N/A'}
-                          </p>
-                          <small className="text-muted">Postulé le {formatDate(app.applied_at)}</small>
-                        </div>
-                        <Badge bg={
-                          app.status === 'accepted' ? 'success' :
-                          app.status === 'rejected' ? 'danger' : 'warning'
-                        }>
-                          {app.status === 'pending'  && 'En attente'}
-                          {app.status === 'accepted' && 'Accepté'}
-                          {app.status === 'rejected' && 'Refusé'}
-                        </Badge>
-                      </div>
-
-                      {/* Evaluation block — shown if company evaluated this application */}
-                      {ev && (
-                        <div className="mt-3 p-3 rounded" style={{ backgroundColor:'white', border:'1px solid #e9ecef' }}>
-                          <div className="d-flex align-items-center gap-2 mb-2">
-                            <FaTrophy style={{ color:'#FFC107' }} />
-                            <strong style={{ fontSize:'0.9rem' }}>Évaluation de l'entreprise</strong>
-                            <span style={{ color: lbl.color, fontWeight:'bold', fontSize:'0.9rem' }}>{lbl.text}</span>
-                          </div>
-
-                          <Row className="mb-2">
-                            {[
-                              { key:'overall',       label:'Note générale' },
-                              { key:'technical',     label:'Technique' },
-                              { key:'communication', label:'Communication' },
-                              { key:'teamwork',      label:'Travail en équipe' },
-                              { key:'initiative',    label:'Initiative' },
-                            ].map(({ key, label }) => ev[key] > 0 && (
-                              <Col md={6} key={key} className="mb-2">
-                                <div className="d-flex justify-content-between mb-1">
-                                  <small>{label}</small>
-                                  <StarDisplay value={ev[key]} />
-                                </div>
-                                <ProgressBar
-                                  now={(ev[key] / 5) * 100}
-                                  variant={ev[key] >= 4 ? 'success' : ev[key] >= 3 ? 'warning' : 'danger'}
-                                  style={{ height:'6px', borderRadius:'10px' }} />
-                              </Col>
-                            ))}
-                          </Row>
-
-                          {ev.comment && (
-                            <div className="p-2 rounded" style={{ backgroundColor:'#f8f9fa', fontSize:'0.85rem' }}>
-                              <em>"{ev.comment}"</em>
-                            </div>
-                          )}
-
-                          {ev.certificate && (
-                            <div className="mt-2">
-                              <Badge bg="success" style={{ padding:'0.4rem 0.8rem' }}>
-                                <FaMedal className="me-1" />Attestation de stage délivrée
-                              </Badge>
-                            </div>
-                          )}
-
-                          {(ev.start_date || ev.end_date) && (
-                            <small className="text-muted d-block mt-1">
-                              📅 {ev.start_date ? formatDate(ev.start_date) : '?'} → {ev.end_date ? formatDate(ev.end_date) : 'En cours'}
+                    <div key={app.id} className="mb-4" style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--secondary-color)'; e.currentTarget.style.boxShadow = '0 10px 15px rgba(0,0,0,0.03)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}>
+                      <div className="p-4">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <h6 style={{ fontWeight: '700', color: 'var(--bg-dark)', margin: 0, fontSize: '1.1rem' }}>{app.offer?.title || 'N/A'}</h6>
+                            <p style={{ color: 'var(--primary-color)', fontWeight: '600', margin: '4px 0 10px 0', fontSize: '0.95rem' }}>
+                              {app.offer?.company?.company_name || 'N/A'}
+                            </p>
+                            <small style={{ color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                              <FaMapMarkerAlt className="me-1" /> Postulé le {formatDate(app.applied_at)}
                             </small>
-                          )}
+                          </div>
+                          <div style={{ background: statusBadge.bg, color: statusBadge.color, padding: '6px 12px', borderRadius: '50px', fontWeight: '700', fontSize: '0.8rem', display: 'inline-block' }}>
+                            {statusBadge.text}
+                          </div>
                         </div>
-                      )}
+
+                        {ev && (
+                          <div className="mt-4 pt-3" style={{ borderTop: '1px dashed #e2e8f0' }}>
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                              <h6 style={{ margin: 0, fontWeight: '700', color: 'var(--bg-dark)', display: 'flex', alignItems: 'center' }}>
+                                <FaTrophy style={{ color: '#f59e0b', marginRight: '8px', fontSize: '1.1rem' }} /> Évaluation de fin de stage
+                              </h6>
+                              <div style={{ color: lbl.color, fontWeight: '800', background: `${lbl.color}15`, padding: '4px 12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                                {lbl.text} ({avg}/5)
+                              </div>
+                            </div>
+
+                            <Row className="g-3 mb-3">
+                              {[
+                                { key: 'overall', label: 'Globale' },
+                                { key: 'technical', label: 'Technique' },
+                                { key: 'communication', label: 'Communication' },
+                                { key: 'teamwork', label: 'Travail équipe' },
+                                { key: 'initiative', label: 'Initiative' },
+                              ].map(({ key, label }) => ev[key] > 0 && (
+                                <Col md={6} key={key}>
+                                  <div style={{ background: '#f8fafc', padding: '10px 15px', borderRadius: '10px' }}>
+                                    <div className="d-flex justify-content-between mb-1">
+                                      <small style={{ fontWeight: '600', color: '#475569' }}>{label}</small>
+                                      <StarDisplay value={ev[key]} />
+                                    </div>
+                                    <ProgressBar now={(ev[key] / 5) * 100} style={{ height: '4px', borderRadius: '10px', backgroundColor: '#e2e8f0' }}
+                                      variant={ev[key] >= 4 ? 'success' : ev[key] >= 3 ? 'warning' : 'danger'} />
+                                  </div>
+                                </Col>
+                              ))}
+                            </Row>
+
+                            {ev.comment && (
+                              <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '1rem', borderRadius: '10px', borderLeft: '4px solid var(--primary-color)', color: '#475569', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '1rem' }}>
+                                "{ev.comment}"
+                              </div>
+                            )}
+
+                            <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                              {ev.certificate && (
+                                <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', padding: '6px 14px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+                                  <FaMedal className="me-2" /> Attestation délivrée
+                                </div>
+                              )}
+                              {(ev.start_date || ev.end_date) && (
+                                <small style={{ color: '#64748b', fontWeight: '500', display: 'flex', alignItems: 'center', background: '#f1f5f9', padding: '4px 12px', borderRadius: '50px' }}>
+                                  <strong className="me-2 text-dark">Période :</strong> {ev.start_date ? formatDate(ev.start_date) : '?'} → {ev.end_date ? formatDate(ev.end_date) : 'En cours'}
+                                </small>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-muted text-center py-3">Aucune candidature pour le moment</p>
+                <div className="text-center py-5" style={{ background: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'white', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                    <FaBriefcase />
+                  </div>
+                  <h6 style={{ fontWeight: '700', color: 'var(--bg-dark)', marginBottom: '5px' }}>Aucune candidature</h6>
+                  <p style={{ color: '#64748b', margin: 0 }}>Vous n'avez pas encore postulé à une offre de stage.</p>
+                  <button className="btn-modern btn-modern-primary mt-3 px-4" onClick={() => navigate('/stages')}>
+                    Découvrir les offres
+                  </button>
+                </div>
               )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+            </div>
+          </Col>
+        </Row>
+      </Container>
 
-      {/* CV Upload Modal */}
-      <Modal show={showCvModal} onHide={() => setShowCvModal(false)} centered>
-        <Modal.Header closeButton style={{ background:'linear-gradient(135deg, #00C853, #00A844)', color:'white' }}>
-          <Modal.Title><FaUpload className="me-2" />{cvPath ? 'Remplacer mon CV' : 'Ajouter mon CV'}</Modal.Title>
+
+      <Modal show={showCvModal} onHide={() => setShowCvModal(false)} centered contentClassName="glass-panel" style={{ border: 'none' }}>
+        <Modal.Header closeButton style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', padding: '1.5rem 2rem' }}>
+          <Modal.Title style={{ fontWeight: '800', color: 'var(--bg-dark)', display: 'flex', alignItems: 'center' }}>
+            <FaUpload className="me-2 text-primary" /> {cvPath ? 'Remplacer mon CV' : 'Ajouter mon CV'}
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-center p-4">
+        <Modal.Body className="text-center p-5">
           {uploadSuccess ? (
-            <Alert variant="success">
-              <FaCheckCircle size={40} className="mb-3" />
-              <h5>CV uploadé avec succès !</h5>
-              <p>Votre CV est maintenant visible par les entreprises.</p>
+            <Alert variant="success" className="text-center py-4" style={{ borderRadius: '16px', border: 'none', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+              <FaCheckCircle size={50} style={{ marginBottom: '1rem' }} />
+              <h4 style={{ fontWeight: '700' }}>CV validé !</h4>
+              <p style={{ margin: 0 }}>Votre profil est maintenant à jour.</p>
             </Alert>
           ) : (
             <>
-              {cvError && <Alert variant="danger" dismissible onClose={() => setCvError('')}>{cvError}</Alert>}
-              <FaFilePdf style={{ fontSize:'4rem', color:'#00C853', marginBottom:'1rem' }} />
-              <h5 className="mb-2">Sélectionnez votre CV</h5>
-              <p className="text-muted mb-4">Formats acceptés : PDF, DOC, DOCX<br />Taille maximale : 5MB</p>
-              <input type="file" id="cv-upload" accept=".pdf,.doc,.docx"
-                onChange={handleFileChange} style={{ display:'none' }} />
-              <Button variant="success" size="lg" disabled={uploading}
+              {cvError && <Alert variant="danger" style={{ borderRadius: '12px', border: 'none', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }} onClose={() => setCvError('')} dismissible>{cvError}</Alert>}
+              <div style={{ width: '80px', height: '80px', borderRadius: '20px', background: 'rgba(14, 165, 233, 0.1)', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', margin: '0 auto 1.5rem' }}>
+                <FaFilePdf />
+              </div>
+              <h5 style={{ fontWeight: '700', color: 'var(--bg-dark)' }}>Sélectionnez votre document</h5>
+              <p style={{ color: '#64748b', marginBottom: '2rem' }}>Formats acceptés : PDF, DOC, DOCX (Max 5MB)</p>
+
+              <input type="file" id="cv-upload" accept=".pdf,.doc,.docx" onChange={handleFileChange} style={{ display: 'none' }} />
+              <button
+                className="btn-modern btn-modern-primary w-100 py-3"
+                disabled={uploading}
                 onClick={() => document.getElementById('cv-upload').click()}
-                style={{ backgroundColor:'#00C853', borderColor:'#00C853', borderRadius:'10px', padding:'0.75rem 2rem' }}>
-                <FaUpload className="me-2" />
-                {uploading ? 'Envoi en cours...' : 'Choisir un fichier'}
-              </Button>
+                style={{ fontSize: '1.05rem', opacity: uploading ? 0.7 : 1 }}
+              >
+                <FaUpload className="me-2" /> {uploading ? 'Envoi en cours...' : 'Choisir un fichier depuis cet appareil'}
+              </button>
             </>
           )}
         </Modal.Body>
       </Modal>
-    </Container>
+
+    </div>
   );
 };
 

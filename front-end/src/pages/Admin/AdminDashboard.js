@@ -14,223 +14,230 @@ const AdminDashboard = () => {
     dispatch(fetchAdminStats());
   }, [dispatch]);
 
+  const StatCard = ({ title, count, subtitle, icon, colorBase }) => (
+    <div className="glass-panel" style={{
+      padding: '1.5rem',
+      height: '100%',
+      border: `1px solid rgba(255,255,255,0.8)`,
+      background: 'white',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'all 0.3s ease'
+    }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-5px)';
+        e.currentTarget.style.boxShadow = `0 15px 30px ${colorBase}22`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'var(--glass-shadow)';
+      }}>
+      <div style={{
+        position: 'absolute', top: 0, right: 0, width: '100px', height: '100px',
+        background: `radial-gradient(circle at top right, ${colorBase}44, transparent 70%)`,
+        borderRadius: '0 0 0 100%'
+      }}></div>
+      <div className="d-flex justify-content-between align-items-center position-relative">
+        <div>
+          <h3 className="mb-1" style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--bg-dark)' }}>{count}</h3>
+          <p className="mb-0" style={{ fontWeight: '600', color: '#64748b' }}>{title}</p>
+          <small style={{ color: colorBase, fontWeight: '500' }}>{subtitle}</small>
+        </div>
+        <div style={{
+          width: '60px', height: '60px', borderRadius: '16px',
+          background: `${colorBase}15`, color: colorBase,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1.8rem'
+        }}>
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <Container fluid className="py-5">
-      <div className="mb-4">
-        <h2>Tableau de bord Admin</h2>
-        <p className="text-muted">Vue d'ensemble de la plateforme StageFinder</p>
+    <Container fluid className="py-5" style={{ minHeight: 'calc(100vh - 80px)', background: 'var(--bg-light)' }}>
+      <div className="mb-5">
+        <h2 style={{ fontWeight: '800', color: 'var(--bg-dark)', letterSpacing: '-0.5px' }}>Tableau de bord Admin</h2>
+        <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Vue d'ensemble de la plateforme StageFinder</p>
       </div>
 
       {/* Stats Cards */}
-      <Row className="mb-4">
+      <Row className="mb-5 g-4">
         <Col md={3}>
-          <Card style={{
-            border: 'none', borderRadius: '15px',
-            background: 'linear-gradient(135deg, #0066CC, #0052A3)',
-            color: 'white', boxShadow: '0 5px 20px rgba(0,102,204,0.3)'
-          }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 className="mb-0">{stats?.totalUsers || 0}</h3>
-                  <p className="mb-0">Utilisateurs</p>
-                  <small style={{ opacity: 0.8 }}>+{stats?.newUsersThisMonth || 0} ce mois</small>
-                </div>
-                <FaUsers size={50} style={{ opacity: 0.5 }} />
-              </div>
-            </Card.Body>
-          </Card>
+          <StatCard
+            title="Utilisateurs"
+            count={stats?.totalUsers || 0}
+            subtitle={`+${stats?.newUsersThisMonth || 0} ce mois`}
+            icon={<FaUsers />}
+            colorBase="#6366f1"
+          />
         </Col>
 
         <Col md={3}>
-          <Card style={{
-            border: 'none', borderRadius: '15px',
-            background: 'linear-gradient(135deg, #00C853, #00A844)',
-            color: 'white', boxShadow: '0 5px 20px rgba(0,200,83,0.3)'
-          }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 className="mb-0">{stats?.totalStages || 0}</h3>
-                  <p className="mb-0">Offres de stage</p>
-                  <small style={{ opacity: 0.8 }}>{stats?.activeStages || 0} approuvées</small>
-                </div>
-                <FaBriefcase size={50} style={{ opacity: 0.5 }} />
-              </div>
-            </Card.Body>
-          </Card>
+          <StatCard
+            title="Offres de stage"
+            count={stats?.totalStages || 0}
+            subtitle={`${stats?.activeStages || 0} approuvées`}
+            icon={<FaBriefcase />}
+            colorBase="#0ea5e9"
+          />
         </Col>
 
         <Col md={3}>
-          <Card style={{
-            border: 'none', borderRadius: '15px',
-            background: 'linear-gradient(135deg, #FFA726, #FB8C00)',
-            color: 'white', boxShadow: '0 5px 20px rgba(255,167,38,0.3)'
-          }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 className="mb-0">{stats?.totalCompanies || 0}</h3>
-                  <p className="mb-0">Entreprises</p>
-                  <small style={{ opacity: 0.8 }}>{stats?.pendingStages || 0} stages en attente</small>
-                </div>
-                <FaBuilding size={50} style={{ opacity: 0.5 }} />
-              </div>
-            </Card.Body>
-          </Card>
+          <StatCard
+            title="Entreprises"
+            count={stats?.totalCompanies || 0}
+            subtitle={`${stats?.pendingStages || 0} en attente`}
+            icon={<FaBuilding />}
+            colorBase="#ec4899"
+          />
         </Col>
 
         <Col md={3}>
-          <Card style={{
-            border: 'none', borderRadius: '15px',
-            background: 'linear-gradient(135deg, #9C27B0, #7B1FA2)',
-            color: 'white', boxShadow: '0 5px 20px rgba(156,39,176,0.3)'
-          }}>
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 className="mb-0">{stats?.totalApplications || 0}</h3>
-                  <p className="mb-0">Candidatures</p>
-                  <small style={{ opacity: 0.8 }}>+{stats?.applicationsToday || 0} aujourd'hui</small>
-                </div>
-                <FaChartLine size={50} style={{ opacity: 0.5 }} />
-              </div>
-            </Card.Body>
-          </Card>
+          <StatCard
+            title="Candidatures"
+            count={stats?.totalApplications || 0}
+            subtitle={`+${stats?.applicationsToday || 0} aujourd'hui`}
+            icon={<FaChartLine />}
+            colorBase="#10b981"
+          />
         </Col>
       </Row>
 
-      {/* Charts — now using real DB data */}
-      <Row className="mb-4">
+      {/* Charts */}
+      <Row className="mb-5 g-4">
         <Col lg={8}>
-          <Card style={{ border: 'none', borderRadius: '15px', boxShadow: '0 3px 15px rgba(0,0,0,0.1)' }}>
-            <Card.Header style={{ background: 'white', borderBottom: '2px solid #e9ecef', borderRadius: '15px 15px 0 0' }}>
-              <h5 className="mb-0">Statistiques des 6 derniers mois</h5>
-            </Card.Header>
-            <Card.Body>
-              {isLoading ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="stages" stroke="#0066CC" strokeWidth={2} name="Stages" />
-                    <Line type="monotone" dataKey="users" stroke="#00C853" strokeWidth={2} name="Utilisateurs" />
-                    <Line type="monotone" dataKey="applications" stroke="#FFA726" strokeWidth={2} name="Candidatures" />
+          <div className="glass-panel" style={{ background: 'white', padding: '1.5rem', height: '100%' }}>
+            <h5 style={{ fontWeight: '700', marginBottom: '1.5rem', color: 'var(--bg-dark)' }}>Statistiques des 6 derniers mois</h5>
+            {isLoading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status" />
+              </div>
+            ) : (
+              <div style={{ height: '300px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dx={-10} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ fontWeight: '600' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                    <Line type="monotone" dataKey="stages" stroke="#0ea5e9" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} name="Stages" />
+                    <Line type="monotone" dataKey="users" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} name="Utilisateurs" />
+                    <Line type="monotone" dataKey="applications" stroke="#ec4899" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} name="Candidatures" />
                   </LineChart>
                 </ResponsiveContainer>
-              )}
-            </Card.Body>
-          </Card>
+              </div>
+            )}
+          </div>
         </Col>
 
         <Col lg={4}>
-          <Card style={{ border: 'none', borderRadius: '15px', boxShadow: '0 3px 15px rgba(0,0,0,0.1)', height: '100%' }}>
-            <Card.Header style={{ background: 'white', borderBottom: '2px solid #e9ecef', borderRadius: '15px 15px 0 0' }}>
-              <h5 className="mb-0">Répartition des utilisateurs</h5>
-            </Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={250}>
+          <div className="glass-panel" style={{ background: 'white', padding: '1.5rem', height: '100%' }}>
+            <h5 style={{ fontWeight: '700', marginBottom: '1.5rem', color: 'var(--bg-dark)' }}>Répartition des utilisateurs</h5>
+            <div style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { type: 'Étudiants',  count: stats?.studentCount  || 0 },
-                  { type: 'Entreprises', count: stats?.companyCount  || 0 },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#0066CC" />
+                  { type: 'Étudiants', count: stats?.studentCount || 0 },
+                  { type: 'Entreprises', count: stats?.companyCount || 0 },
+                ]} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dx={-10} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(99, 102, 241, 0.05)' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                  />
+                  <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={60} />
                 </BarChart>
               </ResponsiveContainer>
-            </Card.Body>
-          </Card>
+            </div>
+          </div>
         </Col>
       </Row>
 
       {/* Quick Links + Recent Activities */}
-      <Row className="mb-4">
+      <Row className="mb-4 g-4">
         <Col md={6}>
-          <Card style={{ border: 'none', borderRadius: '15px', boxShadow: '0 3px 15px rgba(0,0,0,0.1)' }}>
-            <Card.Header style={{ background: 'white', borderBottom: '2px solid #e9ecef' }}>
-              <h5 className="mb-0">Actions rapides</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="d-grid gap-2">
-                <Link to="/admin/users" style={{ textDecoration: 'none' }}>
-                  <Card className="p-3" style={{ cursor: 'pointer', border: '1px solid #e9ecef' }}>
-                    <div className="d-flex align-items-center">
-                      <FaUsers size={30} className="me-3 text-primary" />
-                      <div>
-                        <strong>Gérer les utilisateurs</strong>
-                        <p className="mb-0 text-muted small">Voir et modérer tous les utilisateurs</p>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-                <Link to="/admin/stages" style={{ textDecoration: 'none' }}>
-                  <Card className="p-3" style={{ cursor: 'pointer', border: '1px solid #e9ecef' }}>
-                    <div className="d-flex align-items-center">
-                      <FaBriefcase size={30} className="me-3 text-success" />
-                      <div>
-                        <strong>Gérer les stages</strong>
-                        <p className="mb-0 text-muted small">Modérer les offres de stage</p>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-                <Link to="/admin/companies" style={{ textDecoration: 'none' }}>
-                  <Card className="p-3" style={{ cursor: 'pointer', border: '1px solid #e9ecef' }}>
-                    <div className="d-flex align-items-center">
-                      <FaBuilding size={30} className="me-3 text-warning" />
-                      <div>
-                        <strong>Gérer les entreprises</strong>
-                        <p className="mb-0 text-muted small">Voir et valider les entreprises</p>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              </div>
-            </Card.Body>
-          </Card>
+          <div className="glass-panel" style={{ background: 'white', padding: '1.5rem', height: '100%' }}>
+            <h5 style={{ fontWeight: '700', marginBottom: '1.5rem', color: 'var(--bg-dark)' }}>Actions rapides</h5>
+            <div className="d-flex flex-column gap-3">
+              <Link to="/admin/users" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ padding: '1rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#f8fafc', transition: 'all 0.2s', display: 'flex', alignItems: 'center' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.transform = 'translateX(5px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+                  <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginRight: '1rem' }}>
+                    <FaUsers />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--bg-dark)' }}>Gérer les utilisateurs</strong>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Voir et modérer tous les profils</span>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/admin/stages" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ padding: '1rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#f8fafc', transition: 'all 0.2s', display: 'flex', alignItems: 'center' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.transform = 'translateX(5px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+                  <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(14, 165, 233, 0.1)', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginRight: '1rem' }}>
+                    <FaBriefcase />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--bg-dark)' }}>Gérer les offres de stage</strong>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Approuver et modérer les annonces</span>
+                  </div>
+                </div>
+              </Link>
+
+              <Link to="/admin/companies" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ padding: '1rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#f8fafc', transition: 'all 0.2s', display: 'flex', alignItems: 'center' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.transform = 'translateX(5px)'; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.transform = 'translateX(0)'; }}>
+                  <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(236, 72, 153, 0.1)', color: 'var(--secondary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginRight: '1rem' }}>
+                    <FaBuilding />
+                  </div>
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--bg-dark)' }}>Gérer les entreprises</strong>
+                    <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Valider les comptes recruteurs</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
         </Col>
 
         <Col md={6}>
-          <Card style={{ border: 'none', borderRadius: '15px', boxShadow: '0 3px 15px rgba(0,0,0,0.1)' }}>
-            <Card.Header style={{ background: 'white', borderBottom: '2px solid #e9ecef' }}>
-              <h5 className="mb-0">Activités récentes</h5>
-            </Card.Header>
-            <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div className="glass-panel" style={{ background: 'white', padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <h5 style={{ fontWeight: '700', marginBottom: '1.5rem', color: 'var(--bg-dark)' }}>Activités récentes</h5>
+            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
               {Array.isArray(recentActivities) && recentActivities.length > 0 ? (
                 recentActivities.map((activity, index) => (
-                  <div key={index} className="mb-3 pb-3" style={{ borderBottom: '1px solid #e9ecef' }}>
-                    <div className="d-flex align-items-start">
-                      <div className="me-3 mt-1">
-                        {activity.type === 'user'  && <FaUsers className="text-primary" />}
-                        {activity.type === 'offer' && <FaBriefcase className="text-success" />}
-                        {activity.type === 'application' && <FaChartLine className="text-info" />}
-                      </div>
-                      <div className="flex-grow-1">
-                        <p className="mb-1">{activity.message}</p>
-                        <small className="text-muted">
-                          {activity.timestamp
-                            ? new Date(activity.timestamp).toLocaleString('fr-FR')
-                            : ''}
-                        </small>
-                      </div>
+                  <div key={index} className="d-flex align-items-start mb-3 pb-3" style={{ borderBottom: index < recentActivities.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                    <div style={{
+                      width: '36px', height: '36px', borderRadius: '10px',
+                      background: activity.type === 'user' ? 'rgba(99, 102, 241, 0.1)' : activity.type === 'offer' ? 'rgba(14, 165, 233, 0.1)' : 'rgba(236, 72, 153, 0.1)',
+                      color: activity.type === 'user' ? 'var(--primary-color)' : activity.type === 'offer' ? 'var(--accent-color)' : 'var(--secondary-color)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '15px', flexShrink: 0, marginTop: '2px'
+                    }}>
+                      {activity.type === 'user' && <FaUsers size={16} />}
+                      {activity.type === 'offer' && <FaBriefcase size={16} />}
+                      {activity.type === 'application' && <FaChartLine size={16} />}
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-light)', lineHeight: '1.4' }}>{activity.message}</p>
+                      <small style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
+                        {activity.timestamp ? new Date(activity.timestamp).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }) : ''}
+                      </small>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-muted text-center py-3">Aucune activité récente</p>
+                <div className="d-flex flex-column align-items-center justify-content-center h-100 py-4 opacity-50">
+                  <span style={{ fontSize: '2.5rem', marginBottom: '10px' }}>📭</span>
+                  <p className="text-muted text-center m-0">Aucune activité récente</p>
+                </div>
               )}
-            </Card.Body>
-          </Card>
+            </div>
+          </div>
         </Col>
       </Row>
     </Container>

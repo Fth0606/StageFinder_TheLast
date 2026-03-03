@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaSearch, FaBriefcase, FaRocket} from 'react-icons/fa';
+import { FaSearch, FaBriefcase, FaRocket, FaBuilding, FaUserGraduate } from 'react-icons/fa';
 import StageCard from '../../components/Cards/StageCard';
 import { fetchStages } from '../../store/slices/stagesSlice';
 import './Home.module.css';
@@ -19,153 +19,165 @@ const Home = () => {
   return (
     <div className="home-page">
       {/* Hero Section */}
-      <section style={{
-        background: 'linear-gradient(135deg, #0066CC 0%, #00C853 100%)',
-        color: 'white',
-        padding: '5rem 0',
-        minHeight: '75vh',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
-        
+      <section className="hero-section">
         <Container>
           <Row className="align-items-center">
-            <Col lg={6}>
-              <h1 className="display-4 fw-bold mb-4">
-                Trouvez le <span style={{ color: '#00C853' }}>Stage</span> de vos Rêves
+            <Col lg={6} className="mb-5 mb-lg-0">
+              <div className="hero-badge">
+                <span style={{ color: '#fff' }}>✨ Nouveau :</span> Plus de 500 offres ajoutées ce mois-ci
+              </div>
+              <h1 className="display-4 fw-bold">
+                Démarrez votre carrière avec le <span className="text-gradient">stage idéal</span>
               </h1>
-              <p className="lead mb-4">
-                StageFinder vous connecte avec les meilleures opportunités de stages
-                dans votre domaine. Lancez votre carrière dès aujourd'hui !
+              <p className="lead mt-4 mb-5" style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.2rem', lineHeight: '1.6' }}>
+                StageFinder est la plateforme premium qui connecte les étudiants talentueux aux entreprises innovantes. Propulsez votre avenir dès aujourd'hui.
               </p>
-              <div className="d-flex gap-3">
-                <Link to="/stages">
-                  <Button variant="light" size="lg" style={{
-                    padding: '0.75rem 2rem',
-                    fontWeight: '600'
-                  }}>
-                    <FaSearch className="me-2" />
-                    Rechercher un Stage
-                  </Button>
+
+              <div className="d-flex flex-wrap gap-3">
+                <Link to="/stages" style={{ textDecoration: 'none' }}>
+                  <button className="btn-modern btn-modern-primary">
+                    <FaSearch /> Découvrir les offres
+                  </button>
                 </Link>
 
                 {!isAuthenticated && (
-                  <Link to="/register">
-                  <Button variant="success" size="lg" style={{
-                    padding: '0.75rem 2rem',
-                    fontWeight: '600',
-                    backgroundColor: '#00C853',
-                    borderColor: '#00C853'
-                  }}>
-                    <FaRocket className="me-2" />
-                    Créer un Compte
-                  </Button>
-                </Link>
+                  <Link to="/register" style={{ textDecoration: 'none' }}>
+                    <button className="btn-modern btn-modern-glass">
+                      <FaRocket /> Rejoindre le réseau
+                    </button>
+                  </Link>
                 )}
-                
-                
+              </div>
+
+              <div className="mt-5 d-flex gap-4 align-items-center" style={{ opacity: 0.8 }}>
+                <div className="d-flex flex-column">
+                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>2M+</span>
+                  <span style={{ fontSize: '0.9rem' }}>Étudiants placés</span>
+                </div>
+                <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.2)' }}></div>
+                <div className="d-flex flex-column">
+                  <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>10k+</span>
+                  <span style={{ fontSize: '0.9rem' }}>Entreprises trustées</span>
+                </div>
               </div>
             </Col>
-            <Col lg={6} className="d-none d-lg-flex justify-content-center">
-              <FaBriefcase size={300} style={{ opacity: 0.25 }} />
+
+            <Col lg={6} className="position-relative d-none d-lg-block">
+              <div className="hero-illustration">
+                {/* Visual abstract representation instead of just a flat icon */}
+                <div className="glass-panel" style={{ width: '380px', height: '420px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <FaBriefcase color="white" size={24} />
+                    </div>
+                    <Badge bg="success" style={{ padding: '8px 12px', borderRadius: '8px' }}>Active</Badge>
+                  </div>
+                  <div style={{ height: '20px', width: '60%', background: 'rgba(255,255,255,0.2)', borderRadius: '10px' }}></div>
+                  <div style={{ height: '12px', width: '80%', background: 'rgba(255,255,255,0.1)', borderRadius: '10px' }}></div>
+                  <div style={{ height: '12px', width: '40%', background: 'rgba(255,255,255,0.1)', borderRadius: '10px' }}></div>
+
+                  <div style={{ marginTop: 'auto', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent-color)' }}></div>
+                    <div>
+                      <div style={{ height: '10px', width: '100px', background: 'rgba(255,255,255,0.2)', borderRadius: '5px', marginBottom: '8px' }}></div>
+                      <div style={{ height: '8px', width: '60px', background: 'rgba(255,255,255,0.1)', borderRadius: '5px' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating accents */}
+                <div className="glass-panel" style={{ position: 'absolute', top: '-20px', right: '0px', padding: '1rem', borderRadius: '16px', animation: 'float 3.5s ease-in-out infinite reverse' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🎯</span> Match 98%
+                </div>
+                <div className="glass-panel" style={{ position: 'absolute', bottom: '40px', left: '-30px', padding: '1rem', borderRadius: '16px', animation: 'float 4.5s ease-in-out infinite' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🚀</span> Premium
+                </div>
+              </div>
             </Col>
           </Row>
         </Container>
       </section>
 
-      {/* Features Section */}
-      <section style={{ 
-        padding: '5rem 0', 
-        backgroundColor: '#f8f9fa' 
-      }}>
+      {/* Modern Features Section */}
+      <section className="features-section">
         <Container>
-          <h2 className="text-center mb-5">Pourquoi StageFinder ?</h2>
-          <Row>
-            <Col md={4} className="text-center mb-4">
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(0, 200, 83, 0.1))',
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1rem'
-              }}>
-                <FaSearch size={50} style={{ color: '#0066CC' }} />
+          <div className="text-center mb-5 pb-3">
+            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-light)' }}>L'excellence à chaque étape</h2>
+            <p style={{ color: '#64748b', fontSize: '1.1rem', maxWidth: '600px', margin: '1rem auto' }}>
+              Nous avons repensé la recherche de stage pour l'adapter aux standards d'aujourd'hui, avec des algorithmes intelligents et une sécurité infaillible.
+            </p>
+          </div>
+
+          <Row className="g-4">
+            <Col md={4}>
+              <div className="feature-card">
+                <div className="feature-icon-wrapper" style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary-color)' }}>
+                  <FaSearch />
+                </div>
+                <h4 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--bg-dark)' }}>Recherche Intelligente</h4>
+                <p style={{ color: '#64748b', lineHeight: '1.6' }}>Des filtres avancés et un matching sur-mesure pour découvrir des offres qui vous correspondent vraiment, en un instant.</p>
               </div>
-              <h4>Recherche Facile</h4>
-              <p>Trouvez rapidement des stages adaptés à vos compétences et aspirations</p>
             </Col>
-            <Col md={4} className="text-center mb-4">
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(0, 200, 83, 0.1))',
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1rem'
-              }}>
-                <FaBriefcase size={50} style={{ color: '#00C853' }} />
+
+            <Col md={4}>
+              <div className="feature-card">
+                <div className="feature-icon-wrapper" style={{ background: 'rgba(236, 72, 153, 0.1)', color: 'var(--secondary-color)' }}>
+                  <FaBuilding />
+                </div>
+                <h4 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--bg-dark)' }}>Réseau d'Élite</h4>
+                <p style={{ color: '#64748b', lineHeight: '1.6' }}>Accédez à un portfolio d'entreprises certifiées, allant des startups innovantes aux leaders internationaux du CAC40.</p>
               </div>
-              <h4>Entreprises Vérifiées</h4>
-              <p>Accédez à des offres d'entreprises reconnues et fiables</p>
             </Col>
-            <Col md={4} className="text-center mb-4">
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(0, 200, 83, 0.1))',
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1rem'
-              }}>
-                <FaRocket size={50} style={{ color: '#0066CC' }} />
+
+            <Col md={4}>
+              <div className="feature-card">
+                <div className="feature-icon-wrapper" style={{ background: 'rgba(14, 165, 233, 0.1)', color: 'var(--accent-color)' }}>
+                  <FaUserGraduate />
+                </div>
+                <h4 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--bg-dark)' }}>Profil Impactant</h4>
+                <p style={{ color: '#64748b', lineHeight: '1.6' }}>Un espace candidat optimisé pour mettre en valeur vos soft et hard skills. Postulez en un seul clic, sans tracas.</p>
               </div>
-              <h4>Candidature Simple</h4>
-              <p>Postulez en quelques clics avec votre profil personnalisé</p>
             </Col>
           </Row>
         </Container>
       </section>
 
       {/* Latest Stages Section */}
-      <section style={{ padding: '5rem 0' }}>
+      <section style={{ padding: '6rem 0', background: 'white' }}>
         <Container>
-          <h2 className="text-center mb-5">Dernières Offres de Stage</h2>
+          <div className="d-flex justify-content-between align-items-end mb-5">
+            <div>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--text-light)', margin: 0 }}>Offres récentes</h2>
+              <p style={{ color: '#64748b', marginTop: '10px', fontSize: '1.1rem' }}>Les opportunités du moment à ne pas manquer</p>
+            </div>
+            <Link to="/stages" className="d-none d-md-block" style={{ textDecoration: 'none' }}>
+              <span style={{ color: 'var(--primary-color)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                Explorer tout <span>→</span>
+              </span>
+            </Link>
+          </div>
+
           {isLoading ? (
-            <div className="text-center">
-              <div className="spinner-border text-primary" role="status" style={{
-                width: '3rem',
-                height: '3rem',
-                borderWidth: '0.3rem'
-              }}>
+            <div className="d-flex justify-content-center py-5">
+              <div className="spinner-border" style={{ color: 'var(--primary-color)', width: '3rem', height: '3rem' }} role="status">
                 <span className="visually-hidden">Chargement...</span>
               </div>
             </div>
           ) : (
-            <Row>
+            <Row className="g-4">
               {stages.slice(0, 6).map((stage) => (
-                <Col key={stage.id} md={6} lg={4} className="mb-4">
+                <Col key={stage.id} md={6} lg={4}>
                   <StageCard stage={stage} />
                 </Col>
               ))}
             </Row>
           )}
-          <div className="text-center mt-4">
-            <Link to="/stages">
-              <Button variant="primary" size="lg" style={{
-                backgroundColor: '#0066CC',
-                borderColor: '#0066CC',
-                padding: '0.75rem 2rem',
-                fontWeight: '600'
-              }}>
-                Voir Toutes les Offres
-              </Button>
+
+          <div className="text-center mt-5 d-md-none">
+            <Link to="/stages" style={{ textDecoration: 'none' }}>
+              <button className="btn-modern btn-modern-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Explorer tout
+              </button>
             </Link>
           </div>
         </Container>
