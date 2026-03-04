@@ -42,8 +42,8 @@ export const apiService = {
     login: (credentials) => api.post('/login', credentials),
     logout: () => api.post('/logout'),
     getUser: () => api.get('/user'),
-    
-    
+
+
     // Offers (Stages)
     getOffers: (params) => api.get('/offers', { params }),
     getOffer: (id) => api.get(`/offers/${id}`),
@@ -51,26 +51,21 @@ export const apiService = {
     updateOffer: (id, data) => api.put(`/offers/${id}`, data),
     deleteOffer: (id) => api.delete(`/offers/${id}`),
     getMyOffers: () => api.get('/my-offers'), // company's own offers (all statuses)
-    
+
     // Applications
     getApplications: () => api.get('/applications'),
     applyToOffer: (data) => api.post('/applications', data),
     updateApplicationStatus: (id, data) => api.put(`/applications/${id}`, data),
     submitEvaluation: (applicationId, data) => api.post(`/applications/${applicationId}/evaluation`, data),
-    
+
     // Profile
     getProfile: () => api.get('/profile'),
     updateProfile: (data) => api.put('/profile', data),
     completeStudentProfile: (data) => api.post('/profile/student', data),
     completeCompanyProfile: (data) => api.post('/profile/company', data),
-    
-    // Messages
-    getConversations: () => api.get('/conversations'),
-    getConversation: (id) => api.get(`/conversations/${id}`),
-    startConversation: (data) => api.post('/conversations', data),
-    sendMessage: (conversationId, data) => api.post(`/conversations/${conversationId}/messages`, data),
-    markConversationRead: (id) => api.put(`/conversations/${id}/read`),
-    
+    uploadPhoto: (data) => api.post('/profile/upload-photo', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+
+
     // Admin
     getAdminStats: () => api.get('/admin/stats'),
     getAdminUsers: () => api.get('/admin/users'),

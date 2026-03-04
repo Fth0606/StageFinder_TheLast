@@ -151,13 +151,12 @@ const Navbar = () => {
             borderRadius: '16px',
             gap: '4px'
           }}>
-            <NavLinkItem to="/">Accueil</NavLinkItem>
+            {!isAuthenticated && <NavLinkItem to="/">Accueil</NavLinkItem>}
 
             {isAuthenticated && user?.role === 'student' && (
               <>
                 <NavLinkItem to="/stages">Rechercher</NavLinkItem>
                 <NavLinkItem to="/mes-candidatures">Candidatures</NavLinkItem>
-                <NavLinkItem to="/messages">Messages</NavLinkItem>
               </>
             )}
 
@@ -166,7 +165,6 @@ const Navbar = () => {
                 <NavLinkItem to="/company/dashboard">Tableau de bord</NavLinkItem>
                 <NavLinkItem to="/company/post-stage">Publier</NavLinkItem>
                 <NavLinkItem to="/company/applications">Candidatures</NavLinkItem>
-                <NavLinkItem to="/company/messages">Messages</NavLinkItem>
               </>
             )}
 
@@ -391,13 +389,12 @@ const Navbar = () => {
                 }
               `}
             </style>
-            <NavLinkItem to="/">Accueil</NavLinkItem>
+            {!isAuthenticated && <NavLinkItem to="/">Accueil</NavLinkItem>}
 
             {isAuthenticated && user?.role === 'student' && (
               <>
                 <NavLinkItem to="/stages">Rechercher</NavLinkItem>
                 <NavLinkItem to="/mes-candidatures">Mes Candidatures</NavLinkItem>
-                <NavLinkItem to="/messages">Messages</NavLinkItem>
               </>
             )}
 
@@ -406,7 +403,6 @@ const Navbar = () => {
                 <NavLinkItem to="/company/dashboard">Tableau de bord</NavLinkItem>
                 <NavLinkItem to="/company/post-stage">Publier une offre</NavLinkItem>
                 <NavLinkItem to="/company/applications">Candidatures</NavLinkItem>
-                <NavLinkItem to="/company/messages">Messages</NavLinkItem>
               </>
             )}
 

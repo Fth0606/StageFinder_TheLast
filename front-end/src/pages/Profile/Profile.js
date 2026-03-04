@@ -4,9 +4,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   FaEdit, FaBriefcase, FaGraduationCap, FaFilePdf, FaUpload, FaDownload,
-  FaTrash, FaCheckCircle, FaMapMarkerAlt, FaPhone, FaStar, FaTrophy, FaMedal
+  FaTrash, FaCheckCircle, FaMapMarkerAlt, FaPhone, FaStar, FaTrophy, FaMedal, FaCamera
 } from 'react-icons/fa';
-import { fetchUserProfile, fetchUserApplications } from '../../store/slices/userSlice';
+import { fetchUserProfile, fetchUserApplications, updateUserProfile } from '../../store/slices/userSlice';
+import { setUser } from '../../store/slices/authSlice';
+import { apiService } from '../../services/api';
 import api from '../../services/api';
 
 const StarDisplay = ({ value, max = 5 }) => (
@@ -28,6 +30,7 @@ const Profile = () => {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [cvError, setCvError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [photoLoading, setPhotoLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchUserProfile());
@@ -72,6 +75,27 @@ const Profile = () => {
       setCvError(err.response?.data?.message || 'Erreur lors de l\'upload.');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    setPhotoLoading(true);
+    try {
+      const response = await apiService.uploadPhoto(formData);
+      dispatch(setUser(response.data.user));
+      // Re-fetch profile to update the state in userSlice
+      dispatch(fetchUserProfile());
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      alert('Erreur lors de l\'upload de la photo.');
+    } finally {
+      setPhotoLoading(false);
     }
   };
 
@@ -123,17 +147,59 @@ const Profile = () => {
           <Col lg={4}>
             {/* Profile card */}
             <div className="glass-panel text-center p-4 mb-4">
-              <div style={{
-                width: '120px', height: '120px', borderRadius: '24px', margin: '0 auto 1.5rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                color: 'white', fontSize: '2.5rem', fontWeight: 'bold',
-                boxShadow: '0 15px 30px rgba(99, 102, 241, 0.3)', overflow: 'hidden'
-              }}>
+              <div
+                className="profile-photo-container"
+                style={{
+                  width: '120px', height: '120px', borderRadius: '24px', margin: '0 auto 1.5rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                  color: 'white', fontSize: '2.5rem', fontWeight: 'bold',
+                  boxShadow: '0 15px 30px rgba(99, 102, 241, 0.3)', overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
                 {user?.profile_picture
                   ? <img src={`http://localhost:8000/storage/${user.profile_picture}`} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <span>{user?.name?.charAt(0)?.toUpperCase()}</span>}
+
+                {/* Overlay for upload */}
+                <div
+                  className="photo-overlay"
+                  style={{
+                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s',
+                    cursor: 'pointer', color: 'white'
+                  }}
+                  onClick={() => document.getElementById('student-photo-input').click()}
+                >
+                  <FaCamera size={24} />
+                </div>
               </div>
+
+              {/* Download Link */}
+              {user?.profile_picture && (
+                <div className="mb-3">
+                  <a
+                    href={`http://localhost:8000/storage/${user.profile_picture}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-decoration-none"
+                    style={{ color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: '600' }}
+                  >
+                    <FaDownload className="me-1" /> Télécharger la photo
+                  </a>
+                </div>
+              )}
+
+              <input
+                type="file"
+                id="student-photo-input"
+                hidden
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                disabled={photoLoading}
+              />
 
               <h3 style={{ fontWeight: '800', color: 'var(--bg-dark)', marginBottom: '0.2rem' }}>{user?.name}</h3>
               <p style={{ color: '#64748b', marginBottom: '1rem', fontWeight: '500' }}>{user?.email}</p>

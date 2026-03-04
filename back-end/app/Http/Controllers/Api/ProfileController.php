@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class ProfileController extends Controller
 {
@@ -55,6 +56,7 @@ class ProfileController extends Controller
             'industry'     => 'nullable|string|max:100',
             'description'  => 'nullable|string',
             'website'      => 'nullable|string|max:255',
+            'phone'        => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -250,5 +252,42 @@ class ProfileController extends Controller
         }
 
         return response()->json(['message' => 'CV deleted successfully']);
+    }
+
+    /**
+     * Upload profile photo (User or Company)
+     */
+    public function uploadPhoto(Request $request)
+    {
+        $user = $request->user();
+        
+        $validator = Validator::make($request->all(), [
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $photo = $request->file('photo');
+        $fileName = time() . '_' . $photo->getClientOriginalName();
+        $path = $photo->storeAs('profiles', $fileName, 'public');
+
+        if ($user->role === 'company') {
+            $company = $user->company;
+            if ($company) {
+                if ($company->logo_path) Storage::disk('public')->delete($company->logo_path);
+                $company->update(['logo_path' => $path]);
+            }
+        } else {
+            if ($user->profile_picture) Storage::disk('public')->delete($user->profile_picture);
+            $user->update(['profile_picture' => $path]);
+        }
+
+        return response()->json([
+            'message' => 'Photo uploaded successfully',
+            'photo_url' => $path,
+            'user' => $user->fresh()->load(['student', 'company'])
+        ]);
     }
 }

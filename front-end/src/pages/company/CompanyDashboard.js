@@ -120,19 +120,6 @@ const CompanyDashboard = () => {
               <FaUsers className="text-primary" /> Voir les candidatures
             </button>
           </Link>
-          <Link to="/company/messages" style={{ textDecoration: 'none' }}>
-            <button style={{
-              border: '1px solid #e2e8f0', background: 'white', color: 'var(--bg-dark)',
-              padding: '10px 20px', borderRadius: '12px', fontWeight: '600',
-              display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.02)'
-            }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.05)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.02)'; }}
-            >
-              <FaEnvelope className="text-primary" /> Messages
-            </button>
-          </Link>
         </div>
       </div>
 

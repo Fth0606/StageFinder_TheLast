@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Container, Row, Col, Badge } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaSearch, FaBriefcase, FaRocket, FaBuilding, FaUserGraduate } from 'react-icons/fa';
 import StageCard from '../../components/Cards/StageCard';
@@ -10,11 +10,21 @@ import './Home.module.css';
 const Home = () => {
   const dispatch = useDispatch();
   const { stages, isLoading } = useSelector((state) => state.stages);
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (isAuthenticated) {
+      if (user?.role === 'student') {
+        navigate('/stages');
+      } else if (user?.role === 'company') {
+        navigate('/company/dashboard');
+      } else if (user?.role === 'admin') {
+        navigate('/admin/dashboard');
+      }
+    }
     dispatch(fetchStages({ limit: 6 }));
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated, user, navigate]);
 
   return (
     <div className="home-page">

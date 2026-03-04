@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Badge, Modal } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaBuilding, FaBriefcase, FaMapMarkerAlt, FaPhone, FaEnvelope, FaGlobe, FaTrash, FaEye, FaChartLine } from 'react-icons/fa';
+import { FaEdit, FaBuilding, FaBriefcase, FaMapMarkerAlt, FaPhone, FaEnvelope, FaGlobe, FaTrash, FaEye, FaChartLine, FaCamera, FaDownload } from 'react-icons/fa';
+import { apiService } from '../../services/api';
+import { setUser } from '../../store/slices/authSlice';
 import { fetchCompanyStages, deleteStage, fetchCompanyApplications } from '../../store/slices/companySlice';
 import { fetchUserProfile } from '../../store/slices/userSlice';
 
@@ -15,6 +17,8 @@ const CompanyProfile = () => {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [stageToDelete, setStageToDelete] = useState(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     dispatch(fetchUserProfile());
@@ -49,6 +53,28 @@ const CompanyProfile = () => {
     dispatch(fetchCompanyStages());
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    setPhotoLoading(true);
+    try {
+      const response = await apiService.uploadPhoto(formData);
+      dispatch(setUser(response.data.user));
+      dispatch(fetchUserProfile());
+      setSuccessMessage('Logo mis à jour avec succès !');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      alert('Erreur lors de l\'upload du logo.');
+    } finally {
+      setPhotoLoading(false);
+    }
+  };
+
   return (
     <div style={{ minHeight: 'calc(100vh - 80px)', background: 'var(--bg-light)', position: 'relative', overflow: 'hidden', padding: '3rem 0' }}>
       {/* Dynamic Backgrounds */}
@@ -60,17 +86,59 @@ const CompanyProfile = () => {
           <Col lg={4}>
             {/* Profile Card */}
             <div className="glass-panel text-center p-4 mb-4">
-              <div style={{
-                width: '130px', height: '130px', borderRadius: '50%', margin: '0 auto 1.5rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'linear-gradient(135deg, var(--accent-color), #0284c7)', color: 'white',
-                fontSize: '3.5rem', border: '4px solid white', boxShadow: '0 15px 30px rgba(14, 165, 233, 0.3)'
-              }}>
+              <div
+                className="profile-photo-container"
+                style={{
+                  width: '130px', height: '130px', borderRadius: '50%', margin: '0 auto 1.5rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'linear-gradient(135deg, var(--accent-color), #0284c7)', color: 'white',
+                  fontSize: '3.5rem', border: '4px solid white', boxShadow: '0 15px 30px rgba(14, 165, 233, 0.3)',
+                  position: 'relative', overflow: 'hidden'
+                }}
+              >
                 {companyData.logo_path
                   ? <img src={`http://localhost:8000/storage/${companyData.logo_path}`}
                     alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   : <FaBuilding />}
+
+                {/* Overlay for upload */}
+                <div
+                  className="photo-overlay"
+                  style={{
+                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', opacity: 0, transition: 'opacity 0.3s',
+                    cursor: 'pointer', color: 'white'
+                  }}
+                  onClick={() => document.getElementById('company-logo-input').click()}
+                >
+                  <FaCamera size={24} />
+                </div>
               </div>
+
+              {/* Download Link */}
+              {companyData.logo_path && (
+                <div className="mb-3">
+                  <a
+                    href={`http://localhost:8000/storage/${companyData.logo_path}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-decoration-none"
+                    style={{ color: 'var(--accent-color)', fontSize: '0.85rem', fontWeight: '600' }}
+                  >
+                    <FaDownload className="me-1" /> Télécharger le logo
+                  </a>
+                </div>
+              )}
+
+              <input
+                type="file"
+                id="company-logo-input"
+                hidden
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                disabled={photoLoading}
+              />
               <h3 style={{ fontWeight: '800', color: 'var(--bg-dark)', marginBottom: '0.2rem' }}>{companyData.company_name || user?.name || 'Mon Entreprise'}</h3>
               <p style={{ color: '#64748b', marginBottom: '1rem', fontWeight: '500' }}>{user?.email}</p>
 

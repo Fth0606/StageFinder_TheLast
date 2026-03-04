@@ -28,7 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [ProfileController::class, 'show']);
         Route::put('/', [ProfileController::class, 'update']);
         Route::post('/student', [ProfileController::class, 'completeStudentProfile']);
-        Route::post('/company', [ProfileController::class, 'completeCompanyProfile']);
+        Route::post('/complete-company', [ProfileController::class, 'completeCompanyProfile']);
+        Route::post('/upload-photo', [ProfileController::class, 'uploadPhoto']);
         Route::post('/upload-cv', [ProfileController::class, 'uploadCv']);
         Route::delete('/delete-cv', [ProfileController::class, 'deleteCv']);
         Route::get('/download-cv/{userId}', [ProfileController::class, 'downloadCv']);

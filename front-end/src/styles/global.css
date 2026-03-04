@@ -52,6 +52,14 @@ code {
   border-radius: 20px;
 }
 
+.profile-photo-container:hover .photo-overlay {
+  opacity: 1 !important;
+}
+
+.photo-overlay:hover {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;

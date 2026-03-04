@@ -17,24 +17,22 @@ import Profile from './pages/Profile/Profile';
 import EditProfile from './pages/Profile/EditProfile';
 import StagesList from './pages/StagesList/StagesList';
 import StageDetails from './pages/StageDetails/StageDetails';
-import StudentMessages from './pages/Student/StudentMessages';
 import CompleteProfileStudent from './pages/Student/CompleteProfileStudent';
 import Favorites from './pages/Student/Favorites';
 
 
 // Pages - Company
 import CompanyDashboard from './pages/company/CompanyDashboard';
-import CompanyProfile from './pages/company/CompanyProfile'; 
+import CompanyProfile from './pages/company/CompanyProfile';
 import PostStage from './pages/company/PostStage';
 import CompanyApplications from './pages/company/CompanyApplications';
-import CompanyMessages from './pages/company/CompanyMessages';
 import CompleteProfileCompany from './pages/company/CompleteProfileCompany';
 import CompanyEditProfile from './pages/company/CompanyEditProfile';
 import EditStage from './pages/company/EditStage';
 
 // Pages - Admin
 import AdminDashboard from './pages/Admin/AdminDashboard';
-import AdminProfile from './pages/Admin/AdminProfile'; 
+import AdminProfile from './pages/Admin/AdminProfile';
 import AdminUsers from './pages/Admin/AdminUsers';
 import AdminStages from './pages/Admin/AdminStages';
 import AdminCompanies from './pages/Admin/AdminCompanies';
@@ -50,14 +48,14 @@ function App() {
   return (
     <Provider store={store}>
       <Router>
-        <div className="App" style={{ 
-          minHeight: '100vh', 
-          display: 'flex', 
-          flexDirection: 'column' 
+        <div className="App" style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
           <Navbar />
           {/*<TestNavbar/>*/}
-          
+
           <main style={{ flex: 1 }}>
             <Routes>
               {/* ===== PUBLIC ROUTES ===== */}
@@ -68,187 +66,171 @@ function App() {
               <Route path="/stages/:id" element={<StageDetails />} />
 
               {/* ===== STUDENT ROUTES ===== */}
-              <Route 
-                path="/profile" 
+              <Route
+                path="/profile"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <Profile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/complete-profile-student" 
+              <Route
+                path="/complete-profile-student"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <CompleteProfileStudent />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/edit-profile" 
+              <Route
+                path="/edit-profile"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <EditProfile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/mes-candidatures" 
+              <Route
+                path="/mes-candidatures"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <Profile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/messages" 
-                element={
-                  <ProtectedRoute allowedRoles={['student']}>
-                    <StudentMessages />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/favorites" 
+              <Route
+                path="/favorites"
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <Favorites />
                   </ProtectedRoute>
-                } 
+                }
               />
 
               {/* ===== COMPANY ROUTES ===== */}
-              <Route 
-                path="/company/profile" 
+              <Route
+                path="/company/profile"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <CompanyProfile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/company/edit-stage/:id" 
+              <Route
+                path="/company/edit-stage/:id"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <EditStage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/company/edit-profile" 
+              <Route
+                path="/company/edit-profile"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <CompanyEditProfile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/complete-profile-company" 
+              <Route
+                path="/complete-profile-company"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <CompleteProfileCompany />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/company/dashboard" 
+              <Route
+                path="/company/dashboard"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <CompanyDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/company/post-stage" 
+              <Route
+                path="/company/post-stage"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <PostStage />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/company/applications" 
+              <Route
+                path="/company/applications"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <CompanyApplications />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/company/messages" 
-                element={
-                  <ProtectedRoute allowedRoles={['company']}>
-                    <CompanyMessages />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/company/stages/:id" 
+              <Route
+                path="/company/stages/:id"
                 element={
                   <ProtectedRoute allowedRoles={['company']}>
                     <StageDetails />
                   </ProtectedRoute>
-                } 
+                }
               />
 
               {/* ===== ADMIN ROUTES ===== */}
-              <Route 
-                path="/admin/profile" 
+              <Route
+                path="/admin/profile"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminProfile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/edit-profil-admin" 
+              <Route
+                path="/admin/edit-profil-admin"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <EditProfilAdmin />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/dashboard" 
+              <Route
+                path="/admin/dashboard"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminDashboard />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/users" 
+              <Route
+                path="/admin/users"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminUsers />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/stages" 
+              <Route
+                path="/admin/stages"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminStages />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/companies" 
+              <Route
+                path="/admin/companies"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminCompanies />
                   </ProtectedRoute>
-                } 
+                }
               />
 
               {/* ===== 404 NOT FOUND ===== */}
-              <Route 
-                path="*" 
+              <Route
+                path="*"
                 element={
-                  <div style={{ 
-                    minHeight: '60vh', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    minHeight: '60vh',
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'column'
                   }}>
@@ -264,11 +246,11 @@ function App() {
                       Retour à l'accueil
                     </a>
                   </div>
-                } 
+                }
               />
             </Routes>
           </main>
-          
+
           <Footer />
         </div>
       </Router>

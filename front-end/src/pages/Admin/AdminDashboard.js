@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaUsers, FaBriefcase, FaBuilding, FaChartLine } from 'react-icons/fa';
 import { fetchAdminStats } from '../../store/slices/adminSlice';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -142,8 +142,9 @@ const AdminDashboard = () => {
             <div style={{ height: '300px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { type: 'Étudiants', count: stats?.studentCount || 0 },
-                  { type: 'Entreprises', count: stats?.companyCount || 0 },
+                  { type: 'Étudiants', count: stats?.studentCount || 0, color: '#6366f1' },
+                  { type: 'Entreprises', count: stats?.companyCount || 0, color: '#ec4899' },
+                  { type: 'Admins', count: stats?.adminCount || 0, color: '#0ea5e9' },
                 ]} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} />
@@ -152,7 +153,17 @@ const AdminDashboard = () => {
                     cursor={{ fill: 'rgba(99, 102, 241, 0.05)' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                   />
-                  <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={60}>
+                    {
+                      [
+                        { type: 'Étudiants', count: stats?.studentCount || 0, color: '#6366f1' },
+                        { type: 'Entreprises', count: stats?.companyCount || 0, color: '#ec4899' },
+                        { type: 'Admins', count: stats?.adminCount || 0, color: '#0ea5e9' },
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))
+                    }
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

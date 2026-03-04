@@ -27,8 +27,9 @@ class AdminController extends Controller
             'pendingStages'     => Offer::where('status', 'pending')->count(),
             'rejectedStages'    => Offer::where('status', 'rejected')->count(),
             'applicationsToday' => Application::whereDate('applied_at', today())->count(),
-            'studentCount'      => Student::count(),
-            'companyCount'      => Company::count(),
+            'studentCount'      => User::where('role', 'student')->count(),
+            'companyCount'      => User::where('role', 'company')->count(),
+            'adminCount'        => User::where('role', 'admin')->count(),
         ];
 
         // Real monthly data — last 6 months from DB

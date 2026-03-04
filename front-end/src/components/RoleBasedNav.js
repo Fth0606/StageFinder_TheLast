@@ -38,9 +38,6 @@ const RoleBasedNav = () => {
         <Nav.Link as={Link} to="/company/applications">
           Candidatures
         </Nav.Link>
-        <Nav.Link as={Link} to="/company/messages">
-          Messages
-        </Nav.Link>
       </>
     );
   }
