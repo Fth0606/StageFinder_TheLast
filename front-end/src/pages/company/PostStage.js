@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaSave, FaEye, FaPlus, FaTimes, FaBriefcase, FaEdit } from 'react-icons/fa';
+import { FaSave, FaEye, FaPlus, FaTimes, FaBriefcase, FaEdit, FaCheck } from 'react-icons/fa';
 import { createStage } from '../../store/slices/companySlice';
 
 const PostStage = () => {
